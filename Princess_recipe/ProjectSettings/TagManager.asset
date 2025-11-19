@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 3
-  tags: []
+  tags:
+  - Stage1_Egg
+  - Stage1_Monster
+  - Stage1_Boss
   layers:
   - Default
   - TransparentFX
