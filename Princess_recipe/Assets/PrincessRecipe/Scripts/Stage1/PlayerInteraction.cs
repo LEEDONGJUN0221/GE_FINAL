@@ -71,7 +71,7 @@ public class PlayerInteraction : MonoBehaviour
         // 3. Rigidbody 속도 초기화 (충돌 후 관성 제거)
         if (rb != null)
         {
-            rb.velocity = Vector2.zero;
+            rb.linearVelocity = Vector2.zero;
         }
 
         Debug.Log("몬스터와 충돌하여 시작 지점(" + respawnPosition + ")으로 리스폰되었습니다. 달걀: " + currentEggs);
