@@ -2,50 +2,54 @@ using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    [Header("이동 설정 (참조용, 실제 이동 로직 없음)")]
-    // private Rigidbody2D rb; // 이동 로직이 없어 제외
-
-    [Header("리스폰 설정")] // 리스폰 위치 설정
-    public Vector3 respawnPosition = new Vector3(0, 0, 0); // 시작 지점 좌표 (유니티 인스펙터에서 설정)
-    private Rigidbody2D rb; // Respawn()에서 속도 초기화를 위해 유지
+    // ... (기존 변수 유지) ...
+    [Header("리스폰 설정")]
+    public Vector3 respawnPosition = new Vector3(0, 0, 0); 
+    private Rigidbody2D rb; 
 
     [Header("달걀 설정")]
-    public int currentEggs = 0;    // 현재 소유 달걀 수
-    public int maxEggs = 1;        // 최대 보유 달걀 수
-    public int minEggs = 0;        // 최소 보유 달걀 수
+    public int currentEggs = 0;    
+    public int maxEggs = 1;        
+    public int minEggs = 0;        
     
     // 보스 상호작용 관련 변수
-    private BossController nearbyBoss = null; // 근처에 있는 보스 컨트롤러 참조
+    private BossController nearbyBoss = null; 
+
+    // 🌟 추가: GameManager 참조
+    private GameManagerStage1 gameManager;
 
     void Start()
     {
-        // Rigidbody2D 컴포넌트를 가져옵니다 (Respawn에서 사용).
         rb = GetComponent<Rigidbody2D>(); 
-        // 시작 시 현재 위치를 리스폰 위치로 설정합니다.
         respawnPosition = transform.position; 
+        
+        // 🌟 추가: GameManager 참조 가져오기
+        gameManager = FindObjectOfType<GameManagerStage1>();
+        if (gameManager == null)
+        {
+            Debug.LogError("GameManagerStage1을 씬에서 찾을 수 없습니다.");
+        }
     }
 
     void Update()
     {
-        // 보스에게 달걀 전달 입력
-        // (원래 PlayerMove의 Update()에 있던 로직 중 이동과 무관한 부분만 유지)
+        // 🌟 수정: GiveEggToBoss 로직 (오류 발생 부분)
         if (Input.GetKeyDown(KeyCode.Space) && nearbyBoss != null)
         {
             GiveEggToBoss();
         }
     }
 
-    // void FixedUpdate() { /* 이동 로직 제외 */ }
-
     /// <summary>
-    /// 현재 소유한 달걀을 근처 보스에게 전달합니다.
+    /// 현재 소유한 달걀을 근처 보스에게 전달합니다. (누락된 메서드 추가)
     /// </summary>
     void GiveEggToBoss()
     {
         if (currentEggs > 0 && nearbyBoss != null)
         {
             // 달걀을 보스에게 전달 시도
-            if (nearbyBoss.ReceiveEgg())
+            // BossController 스크립트에 ReceiveEgg() 메서드가 있어야 작동합니다.
+            if (nearbyBoss.ReceiveEgg()) 
             {
                 currentEggs--;
                 Debug.Log("보스에게 달걀 전달 성공! 현재: " + currentEggs);
@@ -65,16 +69,16 @@ public class PlayerInteraction : MonoBehaviour
         // 1. 플레이어 위치를 리스폰 지점으로 이동
         transform.position = respawnPosition;
         
-        // 2. 달걀 수 초기화
-        currentEggs = minEggs; // 최소값 0으로 초기화
+        // 2. 달걀 수 초기화 (충돌 로직에서 이미 처리되므로 여기서는 위치만)
         
         // 3. Rigidbody 속도 초기화 (충돌 후 관성 제거)
         if (rb != null)
         {
-            rb.linearVelocity = Vector2.zero;
+            // RigidbodyType2D.Kinematic을 사용하면 linearVelocity 대신 velocity를 사용하는 것이 일반적입니다.
+            rb.velocity = Vector2.zero; 
         }
-
-        Debug.Log("몬스터와 충돌하여 시작 지점(" + respawnPosition + ")으로 리스폰되었습니다. 달걀: " + currentEggs);
+        
+        Debug.Log("몬스터와 충돌하여 시작 지점(" + respawnPosition + ")으로 리스폰되었습니다.");
     }
         
     // 충돌 처리
@@ -87,25 +91,38 @@ public class PlayerInteraction : MonoBehaviour
             {
                 currentEggs += 1;
                 Debug.Log("달걀 획득! 현재: " + currentEggs);
+                
+                if (gameManager != null)
+                {
+                    // 획득 시 점수(Eggs) 업데이트
+                    gameManager.AddScore(1); 
+                }
             }
             else
             {
                 Debug.Log("달걀 최대 보유량 도달!");
             }
+            // 획득 후 달걀 오브젝트 파괴 로직이 필요할 수 있습니다. 
+            // Destroy(collision.gameObject);
         }
 
-        // 2. 몬스터 충돌 로직
+        // 2. 몬스터 충돌 로직 (HP 감소 및 리스폰)
         if (collision.CompareTag("Stage1_Monster"))
         {
+            if (gameManager != null)
+            {
+                gameManager.TakeDamage(); // HP 1 감소 및 HUD 업데이트
+            }
+
             if (currentEggs == maxEggs)
             {
-                currentEggs -= 1;
-                Debug.Log("달걀 감소! 현재: " + currentEggs);
+                // 달걀이 있을 경우 달걀을 잃음
+                currentEggs = minEggs; 
                 Respawn();
             }
             else
             {
-                Debug.Log("달걀이 없어요!!");
+                // 달걀이 없을 경우
                 Respawn();
             }
         }

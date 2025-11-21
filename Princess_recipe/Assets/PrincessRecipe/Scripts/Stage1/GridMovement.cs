@@ -22,10 +22,15 @@ public class GridMovement : MonoBehaviour
     private bool isMoving = false;
     private Rigidbody2D rb; 
     private float actualGridSize; 
+    
+    // 🌟 추가: Sprite Renderer 컴포넌트 참조 변수
+    private SpriteRenderer spriteRenderer; 
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        // 🌟 추가: SpriteRenderer 컴포넌트를 가져옵니다.
+        spriteRenderer = GetComponent<SpriteRenderer>(); 
         
         if (rb != null)
         {
@@ -36,6 +41,10 @@ public class GridMovement : MonoBehaviour
         {
             actualGridSize = grid.cellSize.x;
             Debug.Log($"Tilemap Grid Size가 {actualGridSize}로 설정되었습니다.");
+
+            // 🌟 이전에 추가했다면 이 초기 위치 보정 코드를 제거하거나 주석 처리하세요. 🌟
+            // Vector3Int startCell = grid.WorldToCell(transform.position);
+            // transform.position = grid.GetCellCenterWorld(startCell);
         }
         else
         {
@@ -43,7 +52,7 @@ public class GridMovement : MonoBehaviour
             Debug.LogError("Grid 컴포넌트가 할당되지 않았습니다. 기본 Grid Size (1.0f)를 사용합니다.");
         }
     }
-
+    
     void Update()
     {
         if (isMoving) return; 
@@ -51,6 +60,22 @@ public class GridMovement : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
         
+        // 🌟 추가: 방향 전환 (Flip) 로직
+        if (spriteRenderer != null)
+        {
+            if (h > 0)
+            {
+                // 오른쪽으로 이동: Flip을 끕니다. (정방향)
+                spriteRenderer.flipX = true;
+            }
+            else if (h < 0)
+            {
+                // 왼쪽으로 이동: Flip을 켬으로써 캐릭터를 반전시킵니다.
+                spriteRenderer.flipX = false;
+            }
+        }
+        // -----------------------
+
         // 대각선 이동 금지
         if (h != 0 && v != 0)
         {
