@@ -1363,6 +1363,7 @@ GameObject:
   - component: {fileID: 1787353867}
   - component: {fileID: 1787353866}
   - component: {fileID: 1787353868}
+  - component: {fileID: 1787353869}
   m_Layer: 0
   m_Name: Princess
   m_TagString: Untagged
@@ -1511,7 +1512,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1787353863}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: de1e9d4bd2f4aa247974b50a01e656be, type: 3}
   m_Name: 
@@ -1522,6 +1523,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   collisionRadius: 0.3
+--- !u!114 &1787353869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1787353863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a7f29f95434c3d44ab1bf2f9f22ac52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  grid: {fileID: 414801492}
+  moveDelay: 0.2
+  minBounds: {x: -5, y: -3}
+  maxBounds: {x: 4, y: 6}
 --- !u!1 &2049524224
 GameObject:
   m_ObjectHideFlags: 0
