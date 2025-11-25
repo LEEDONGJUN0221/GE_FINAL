@@ -10,6 +10,7 @@ public class MonsterPatrol : MonoBehaviour
     
     [Header("이동 설정")]
     public float moveSpeed = 5f;
+    
 
     private Vector2 currentTarget;
     private SpriteRenderer spriteRenderer;
@@ -79,5 +80,17 @@ public class MonsterPatrol : MonoBehaviour
                 spriteRenderer.flipX = true;
             }
         }
+    }
+    public void IncreaseSpeed(float speedIncreaseAmount)
+    {
+        moveSpeed += speedIncreaseAmount;
+        Debug.Log($"{gameObject.name}의 속도 증가! 현재 속도: {moveSpeed}");
+    }
+   
+    public void StopMonster()
+    {
+        // moveSpeed를 0으로 설정하여 Update에서의 MoveTowards를 멈춥니다.
+        moveSpeed = 0f;
+        Debug.Log($"{gameObject.name} 몬스터가 멈췄습니다.");
     }
 }

@@ -17,6 +17,15 @@ public class HUDManagerStage1 : MonoBehaviour
     [Tooltip("잃은 HP 이미지 Sprite를 연결하세요.")]
     public Sprite emptyHealthSprite;
 
+    [Header("SCORE(EGG) 이미지 설정 (6개)")]
+    [Tooltip("순서대로 4개의 HP 이미지 오브젝트를 연결하세요.")]
+    public Image[] scoreIcons = new Image[6]; // 4개의 HP 아이콘
+    [Tooltip("빈 EggScore 이미지 Sprite를 연결하세요.")]
+    public Sprite EmptyScoreSprite;
+    [Tooltip("추가된 EggScore 이미지 Sprite를 연결하세요.")]
+    public Sprite FullScoreSprite;
+
+
     private float gameTime = 0f;
     private bool isGameActive = true; 
 
@@ -32,6 +41,11 @@ public class HUDManagerStage1 : MonoBehaviour
         if (fullHealthSprite == null || emptyHealthSprite == null)
         {
             Debug.LogError("HUDManager: fullHealthSprite 또는 emptyHealthSprite가 연결되지 않았습니다!");
+        }
+        
+        if (EmptyScoreSprite == null || FullScoreSprite == null)
+        {
+            Debug.LogError("HUDManager: EmptyScoreSprite 또는 FullScoreSprite가 연결되지 않았습니다!");
         }
     }
 
@@ -73,9 +87,31 @@ public class HUDManagerStage1 : MonoBehaviour
     }
 
     /// <summary> 게임 점수 업데이트 </summary>
+/// <summary> 🌟 수정: 게임 점수 (달걀) 이미지 업데이트 </summary>
     public void UpdateScore(int newScore)
     {
-        scoreText.text = $"Eggs: {newScore}";
+        // 💡 scoreText.text = $"Eggs: {newScore}"; // 텍스트 표기 대신 이미지 표기로 대체
+        
+        // 달걀 아이콘 배열을 순회합니다. (최대 6개)
+        for (int i = 0; i < scoreIcons.Length; i++)
+        {
+            if (scoreIcons[i] != null)
+            {
+                // 현재 인덱스 i가 획득한 점수(newScore)보다 작다면 '꽉 찬' 달걀
+                if (i < newScore)
+                {
+                    scoreIcons[i].sprite = FullScoreSprite;
+                }
+                else
+                {
+                    // 현재 인덱스 i가 획득한 점수(newScore)보다 크거나 같다면 '빈' 달걀
+                    scoreIcons[i].sprite = EmptyScoreSprite;
+                }
+            }
+        }
+        
+        // 참고: scoreText를 디버그용으로 사용하거나, '달걀'이 아닌 다른 텍스트 표시 용도라면 그대로 둘 수 있습니다.
+        // 현재는 달걀 이미지로 대체했으므로 텍스트 업데이트 로직은 제거했습니다.
     }
 
     /// <summary> 게임 진행 시간 표시 포맷 (분:초) </summary>

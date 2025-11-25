@@ -10,12 +10,16 @@ public class BossController : MonoBehaviour
     public Sprite defeatedBossSprite; 
 
     [Header("보스 달걀 요구량")]
-    public int requiredEggs = 6;
+    public int requiredEggs = 5;
     private int receivedEggs = 0; 
     private bool isDefeated = false; 
 
     // GameManagerStage1 참조 (클리어 처리를 위해 필요)
     private GameManagerStage1 gameManager; 
+
+    [Header("몬스터 난이도 조절")]
+    // 🌟 추가: 달걀 1개당 증가시킬 몬스터 이동 속도 값
+    public float monsterSpeedIncreasePerEgg = 1.0f;
 
     void Awake()
     {
@@ -55,6 +59,9 @@ public class BossController : MonoBehaviour
         if (gameManager != null)
         {
             gameManager.AddScore(1); 
+            IncreaseMonsterSpeed();
+
+            Debug.Log($"보스가 달걀을 받았습니다. 현재 {receivedEggs} / {requiredEggs}");
         }
 
         Debug.Log($"보스가 달걀을 받았습니다. 현재 {receivedEggs} / {requiredEggs}");
@@ -66,6 +73,40 @@ public class BossController : MonoBehaviour
 
         return true;
     }
+    void IncreaseMonsterSpeed()
+    {
+        // 씬에서 모든 MonsterPatrol 컴포넌트를 찾습니다.
+        // 2024ver 이후로 FindObjectsOfType<T>()는 FindObjectsByType<T>()로 사용하시는 것을 권장합니다.
+        MonsterPatrol[] monsters = FindObjectsByType<MonsterPatrol>(FindObjectsSortMode.None);
+
+        foreach (MonsterPatrol monster in monsters)
+        {
+            // 각 몬스터의 속도를 증가시킵니다.
+            monster.IncreaseSpeed(monsterSpeedIncreasePerEgg);
+        }
+        
+        if (monsters.Length > 0)
+        {
+            Debug.Log($"달걀 수신으로 인해 총 {monsters.Length} 마리 몬스터의 이동 속도가 {monsterSpeedIncreasePerEgg}만큼 증가했습니다.");
+        }
+    }
+   
+    void StopAllMonsters()
+    {
+        // 씬에서 모든 MonsterPatrol 컴포넌트를 찾습니다.
+        MonsterPatrol[] monsters = FindObjectsByType<MonsterPatrol>(FindObjectsSortMode.None);
+
+        foreach (MonsterPatrol monster in monsters)
+        {
+            // 각 몬스터의 멈춤 메서드를 호출합니다.
+            monster.StopMonster();
+        }
+        
+        if (monsters.Length > 0)
+        {
+            Debug.Log($"총 {monsters.Length} 마리 몬스터의 움직임이 멈췄습니다.");
+        }
+    }
 
     /// <summary>
     /// 보스가 격퇴되었을 때의 처리. (스프라이트 변경)
@@ -74,6 +115,7 @@ public class BossController : MonoBehaviour
     {
         isDefeated = true;
         Debug.Log("🎉 보스 격퇴! 스테이지 클리어!");
+        StopAllMonsters();
         
         // 🌟 1. 보스 스프라이트를 변경합니다.
         if (spriteRenderer != null && defeatedBossSprite != null)

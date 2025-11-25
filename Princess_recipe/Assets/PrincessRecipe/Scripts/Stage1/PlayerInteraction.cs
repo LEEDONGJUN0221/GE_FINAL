@@ -92,12 +92,6 @@ public class PlayerInteraction : MonoBehaviour
             {
                 currentEggs += 1;
                 Debug.Log("달걀 획득! 현재: " + currentEggs);
-                
-                if (gameManager != null)
-                {
-                    // 획득 시 점수(Eggs) 업데이트
-                    gameManager.AddScore(1); 
-                }
             }
             else
             {
