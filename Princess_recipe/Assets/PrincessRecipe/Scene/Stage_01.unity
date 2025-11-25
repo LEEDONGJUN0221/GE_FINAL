@@ -1940,7 +1940,7 @@ GameObject:
   - component: {fileID: 515651360}
   - component: {fileID: 515651363}
   - component: {fileID: 515651362}
-  - component: {fileID: 515651361}
+  - component: {fileID: 515651365}
   - component: {fileID: 515651364}
   m_Layer: 0
   m_Name: Boss
@@ -1964,21 +1964,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 717953932}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &515651361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 515651359}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6db49b1733a930499ebdfe250922d48, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  defeatedBossSprite: {fileID: 21300000, guid: 687ce781c6ccc794f93809e672fe0c84, type: 3}
-  requiredEggs: 6
-  monsterSpeedIncreasePerEgg: 1
 --- !u!70 &515651362
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -2071,7 +2056,22 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!95 &515651364
+--- !u!114 &515651364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 515651359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6db49b1733a930499ebdfe250922d48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defeatedBossSprite: {fileID: 0}
+  requiredEggs: 5
+  monsterSpeedIncreasePerEgg: 1
+--- !u!95 &515651365
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0
