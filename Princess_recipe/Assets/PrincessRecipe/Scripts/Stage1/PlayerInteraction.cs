@@ -75,7 +75,7 @@ public class PlayerInteraction : MonoBehaviour
         if (rb != null)
         {
             // RigidbodyType2D.Kinematic을 사용하면 linearVelocity 대신 velocity를 사용하는 것이 일반적입니다.
-            rb.velocity = Vector2.zero; 
+            rb.linearVelocity = Vector2.zero; 
         }
         
         Debug.Log("몬스터와 충돌하여 시작 지점(" + respawnPosition + ")으로 리스폰되었습니다.");
