@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections; // 🌟 코루틴을 사용하기 위해 추가
 
 public class GameManagerStage1 : MonoBehaviour
 {
@@ -83,15 +84,32 @@ public class GameManagerStage1 : MonoBehaviour
     }
 
     // ---------------------------
-    // 🏆 성공/실패 처리 메서드
+    // 🏆 성공/실패 처리 메서드 (수정됨)
     // ---------------------------
 
     public void GameClear()
     {
+        // 🌟 게임 클리어 시 바로 패널을 띄우는 대신 코루틴을 시작합니다.
+        // 게임 속도는 멈추지 않고, 10초 후에 패널이 뜹니다.
+        StartCoroutine(GameClearCoroutine(10f)); // 10초 딜레이
+    }
+    
+    /// <summary>
+    /// 지정된 시간만큼 대기 후 게임 클리어 패널을 활성화하고 시간을 멈춥니다.
+    /// </summary>
+    private IEnumerator GameClearCoroutine(float delay)
+    {
+        // 1. HUD만 비활성화하여 게임 플레이 정보(점수/체력)만 숨깁니다.
+        if (hudManager != null) hudManager.SetGameActive(false);
+
+        // 2. 지정된 시간(10초)만큼 대기합니다.
+        yield return new WaitForSeconds(delay);
+        
+        // 3. 딜레이 후, 게임 클리어 패널을 활성화하고 게임 시간을 멈춥니다.
         gameClearPanel.SetActive(true); 
         Time.timeScale = 0f;
-        if (hudManager != null) hudManager.SetGameActive(false);
     }
+
 
     public void LoadNextStage()
     {

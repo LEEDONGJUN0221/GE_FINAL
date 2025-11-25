@@ -1946,6 +1946,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f6db49b1733a930499ebdfe250922d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defeatedBossSprite: {fileID: 21300000, guid: 428c0c4f28b52c74dab538a28244db25, type: 3}
   requiredEggs: 6
 --- !u!70 &515651362
 CapsuleCollider2D:
