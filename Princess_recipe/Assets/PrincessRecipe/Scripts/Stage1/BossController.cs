@@ -30,7 +30,8 @@ public class BossController : MonoBehaviour
     void Start()
     {
         // GameManagerStage1 인스턴스 찾기
-        gameManager = FindObjectOfType<GameManagerStage1>();
+        //FindObjectOfType 2024ver 이후로 Deprecated 되어 warning 떠서 수정했습니다.
+        gameManager = FindAnyObjectByType<GameManagerStage1>();
         if (gameManager == null)
         {
             Debug.LogError("씬에서 GameManagerStage1를 찾을 수 없습니다! 보스 기능이 정상 작동하지 않습니다.");

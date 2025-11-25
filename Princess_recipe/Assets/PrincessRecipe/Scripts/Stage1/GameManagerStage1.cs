@@ -20,10 +20,15 @@ public class GameManagerStage1 : MonoBehaviour
     private int maxHealth = 4; // 최대 체력 (HP 아이콘 수)
     private int currentHealth;
 
+    // GameClear 여러 번 호출 방지
+    private bool isGameClear = false;
+
+
     void Awake()
     {
         // ... 기존 코드 ...
-        hudManager = FindObjectOfType<HUDManagerStage1>(); 
+        hudManager = FindAnyObjectByType<HUDManagerStage1>(); 
+        //FindObjectOfType 2024ver 이후로 Deprecated 되어 warning 떠서 수정했습니다.
         if (hudManager == null)
         {
             Debug.LogError("HUDManagerStage1을 씬에서 찾을 수 없습니다! HUDManager 스크립트를 HUD 오브젝트에 부착하고 확인해주세요.");
@@ -69,7 +74,7 @@ public class GameManagerStage1 : MonoBehaviour
     /// </summary>
     public void TakeDamage()
     {
-        currentHealth--;
+        currentHealth = Mathf.Max(0, currentHealth -1); // currentHealth 0 아래로 내려가는것 방지
         
         if (hudManager != null)
         {
@@ -91,6 +96,8 @@ public class GameManagerStage1 : MonoBehaviour
     {
         // 🌟 게임 클리어 시 바로 패널을 띄우는 대신 코루틴을 시작합니다.
         // 게임 속도는 멈추지 않고, 10초 후에 패널이 뜹니다.
+        if(isGameClear) return; // GameClear 여러 번 호출 방지
+        isGameClear = true;        
         StartCoroutine(GameClearCoroutine(10f)); // 10초 딜레이
     }
     

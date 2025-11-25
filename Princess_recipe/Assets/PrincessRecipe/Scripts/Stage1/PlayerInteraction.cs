@@ -24,7 +24,8 @@ public class PlayerInteraction : MonoBehaviour
         respawnPosition = transform.position; 
         
         // 🌟 추가: GameManager 참조 가져오기
-        gameManager = FindObjectOfType<GameManagerStage1>();
+        //FindObjectOfType 2024ver 이후로 Deprecated 되어 warning 떠서 수정했습니다.
+        gameManager = FindAnyObjectByType<GameManagerStage1>();
         if (gameManager == null)
         {
             Debug.LogError("GameManagerStage1을 씬에서 찾을 수 없습니다.");
