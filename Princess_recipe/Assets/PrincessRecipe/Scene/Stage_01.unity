@@ -4741,20 +4741,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 1768024314}
-<<<<<<< Updated upstream
-  moveSpeed: 0.15
+  moveDelay: 0.3
   minBounds: {x: -6, y: -5}
   maxBounds: {x: 4, y: 24}
-  animator: {fileID: 0}
-  idleStateName: Princess_Idle
-  moveStateName: Princess_Jump
-=======
-  moveDelay: 0.2
-  minBounds: {x: -6, y: -5}
-  maxBounds: {x: 4, y: 24}
-  animator: {fileID: 0}
-  moveBoolName: IsMoving
->>>>>>> Stashed changes
+--- !u!114 &1254682388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1254682382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa37aad3fd70ea4596af61242bbd4aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnPosition: {x: 0, y: 0, z: 0}
+  currentEggs: 0
+  maxEggs: 1
+  minEggs: 0
 --- !u!95 &1254682389
 Animator:
   serializedVersion: 7
@@ -4777,65 +4782,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1254682390
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1254682382}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffa37aad3fd70ea4596af61242bbd4aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  respawnPosition: {x: 0, y: 0, z: 0}
-  currentEggs: 0
-  maxEggs: 1
-  minEggs: 0
-  hitInvincibleTime: 1.5
-  blinkInterval: 0.1
-<<<<<<< Updated upstream
-  targetRenderer: {fileID: 1254682386}
-  normalSprite: {fileID: 21300000, guid: 04d8e54af9bfa8e4abf69d156570cd2f, type: 3}
-  eggHoldingSprite: {fileID: 21300000, guid: 86354e0e59c12d144ada6116c28512f2, type: 3}
-=======
-  targetRenderer: {fileID: 0}
-  normalSprite: {fileID: 0}
-  eggHoldingSprite: {fileID: 0}
->>>>>>> Stashed changes
---- !u!1 &1264479296
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1264479297}
-  m_Layer: 0
-  m_Name: Chicken_01 (1)
-  m_TagString: Stage1_Monster
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1264479297
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1264479296}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.5, y: 2.5, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 340421596}
-  m_Father: {fileID: 717953932}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1408719146
 GameObject:
   m_ObjectHideFlags: 0

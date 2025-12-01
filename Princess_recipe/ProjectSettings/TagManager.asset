@@ -4,7 +4,9 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Stage2_Obstacle
+  - Stage1_Monster
+  - Stage1_Egg
+  - Stage1_Boss
   layers:
   - Default
   - TransparentFX
@@ -39,20 +41,23 @@ TagManager:
   - 
   - 
   m_SortingLayers:
-  - name: Background
-    uniqueID: 617430051
-    locked: 0
-  - name: Obstacle
-    uniqueID: 3029419667
-    locked: 0
-  - name: Character
-    uniqueID: 1799891249
-    locked: 0
-  - name: UI
-    uniqueID: 3355897265
-    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: background
+    uniqueID: 743761175
+    locked: 0
+  - name: New Layer 3
+    uniqueID: 1275379315
+    locked: 0
+  - name: character
+    uniqueID: 2862574761
+    locked: 0
+  - name: New Layer 4
+    uniqueID: 4147064579
+    locked: 0
+  - name: New Layer 5
+    uniqueID: 4291201179
     locked: 0
   m_RenderingLayers:
   - Default

@@ -10,20 +10,20 @@ public class GridMovement : MonoBehaviour
     [Tooltip("한 칸 이동 후 다음 입력 가능까지의 딜레이 시간(초)")]
     public float moveDelay = 0.2f;
 
-    private float actualGridSize = 1f;
-
     [Header("이동 경계 (Cell 좌표 기준)")]
     public Vector2Int minBounds = new Vector2Int(-10, -10);
     public Vector2Int maxBounds = new Vector2Int(10, 10);
 
-    [Header("애니메이션")]
+    [Header("애니메이션 설정")]
+    [Tooltip("플레이어 Animator를 넣어주세요.")]
     public Animator animator;
-    public string moveBoolName = "IsMoving"; // Animator bool 파라미터 이름
-
-    private Rigidbody2D rb;
-    private SpriteRenderer spriteRenderer;
+    [Tooltip("Animator에서 사용하는 이동 여부 Bool 파라미터 이름")]
+    public string moveBoolName = "IsMoving";   // Animator 파라미터 이름
 
     private bool isMoving = false;
+    private Rigidbody2D rb;
+    private float actualGridSize = 1f;
+    private SpriteRenderer spriteRenderer;
 
     void Start()
     {
@@ -44,7 +44,8 @@ public class GridMovement : MonoBehaviour
             Debug.LogError("Grid가 할당되지 않았습니다. 기본 크기 1 사용.");
         }
 
-        SetMoveAnimation(false); // Idle 시작
+        // 시작할 때는 Idle
+        SetMoveAnimation(false);
     }
 
     void Update()
@@ -55,11 +56,13 @@ public class GridMovement : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        // 좌우 반전
+        // 방향에 따라 좌우 반전
         if (spriteRenderer != null)
         {
-            if (h > 0) spriteRenderer.flipX = true;
-            else if (h < 0) spriteRenderer.flipX = false;
+            if (h > 0)
+                spriteRenderer.flipX = true;   // 오른쪽
+            else if (h < 0)
+                spriteRenderer.flipX = false;  // 왼쪽
         }
 
         // 대각선 이동 금지
@@ -79,14 +82,15 @@ public class GridMovement : MonoBehaviour
         }
         else
         {
-            SetMoveAnimation(false); // Idle
+            // 입력 없으면 Idle
+            SetMoveAnimation(false);
         }
     }
 
     IEnumerator MoveOneStep(Vector3 direction)
     {
         isMoving = true;
-        SetMoveAnimation(true);
+        SetMoveAnimation(true);   // 이동 시작 → 이동 애니메이션
 
         Vector3 startPos = transform.position;
         Vector3 targetWorld = startPos + direction * actualGridSize;
@@ -109,14 +113,17 @@ public class GridMovement : MonoBehaviour
         // 딜레이 후 다음 입력 가능
         yield return new WaitForSeconds(moveDelay);
 
+        // 이동 끝 → Idle
         SetMoveAnimation(false);
         isMoving = false;
     }
 
-    // Animator 제어 함수
+    // Animator bool 제어 함수
     void SetMoveAnimation(bool moving)
     {
         if (animator != null && !string.IsNullOrEmpty(moveBoolName))
+        {
             animator.SetBool(moveBoolName, moving);
+        }
     }
 }
