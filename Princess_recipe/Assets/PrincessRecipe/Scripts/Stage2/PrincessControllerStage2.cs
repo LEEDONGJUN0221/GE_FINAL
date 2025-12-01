@@ -81,6 +81,15 @@ public class PrincessControllerStage2 : MonoBehaviour
         // 이동 진행은 FixedUpdate에서 함
     }
 
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.collider.CompareTag("Stage2_Obstacle"))
+        {
+            GameManagerStage2.Instance.TakeDamage(1);
+        }
+    }
+
+
     void FixedUpdate()
     {
         if (!isMoving)
