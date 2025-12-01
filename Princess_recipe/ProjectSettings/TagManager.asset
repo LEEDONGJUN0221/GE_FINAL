@@ -4,26 +4,15 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Stage1_Egg
-  - Stage1_Monster
-  - Stage1_Boss
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
   - Stage2_Obstacle
-=======
-  - Stage3_Vine
->>>>>>> Stashed changes
-=======
-  - Stage3_Vine
->>>>>>> Stashed changes
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - Wall
+  - 
   - Water
   - UI
-  - Obstacle
+  - 
   - 
   - 
   - 
@@ -50,33 +39,20 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 617430051
+    locked: 0
+  - name: Obstacle
+    uniqueID: 3029419667
+    locked: 0
+  - name: Character
+    uniqueID: 1799891249
+    locked: 0
+  - name: UI
+    uniqueID: 3355897265
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: Background
-    uniqueID: 846951725
-    locked: 0
-  - name: Overlay
-    uniqueID: 2131514151
-    locked: 0
-  - name: Midground
-    uniqueID: 4290233555
-    locked: 0
-  - name: Character
-    uniqueID: 973914711
-    locked: 0
-  - name: Foreground
-    uniqueID: 3502537257
-    locked: 0
-  - name: UI
-    uniqueID: 3486448491
-    locked: 0
   m_RenderingLayers:
   - Default
-  - Light Layer 1
-  - Light Layer 2
-  - Light Layer 3
-  - Light Layer 4
-  - Light Layer 5
-  - Light Layer 6
-  - Light Layer 7
