@@ -47,7 +47,7 @@ TagManager:
   - name: background
     uniqueID: 743761175
     locked: 0
-  - name: New Layer 3
+  - name: props
     uniqueID: 1275379315
     locked: 0
   - name: character

@@ -25,10 +25,13 @@ public class PlayerInteraction : MonoBehaviour
     [Header("플레이어 스프라이트 설정")]
     [Tooltip("플레이어 스프라이트가 자식에 있다면 여기 직접 넣어주세요.")]
     public SpriteRenderer targetRenderer;
-    [Tooltip("계란을 들고 있지 않을 때의 기본 스프라이트")]
-    public Sprite normalSprite;
-    [Tooltip("계란을 들고 있을 때의 스프라이트")]
-    public Sprite eggHoldingSprite;
+
+    // 🔥 애니메이션 설정 (계란 보유 여부에 따라 상태 전환)
+    [Header("애니메이션 설정")]
+    [Tooltip("플레이어 Animator (계란 보유 애니메이션 전환용)")]
+    public Animator animator;
+    [Tooltip("계란 보유 여부 Bool 파라미터 이름")]
+    public string hasEggBoolName = "HasEgg";
 
     private BossController nearbyBoss = null;
     private GameManagerStage1 gameManager;
@@ -49,6 +52,16 @@ public class PlayerInteraction : MonoBehaviour
             Debug.LogError("PlayerInteraction: SpriteRenderer를 찾을 수 없습니다.", this);
         }
 
+        // Animator 자동 찾기 (인스펙터에서 안 넣어도 되게)
+        if (animator == null)
+        {
+            animator = GetComponentInChildren<Animator>();
+            if (animator == null)
+            {
+                Debug.LogWarning("PlayerInteraction: Animator를 찾지 못했습니다. HasEgg 애니메이션은 동작하지 않습니다.", this);
+            }
+        }
+
         respawnPosition = transform.position;
 
         gameManager = FindAnyObjectByType<GameManagerStage1>();
@@ -60,8 +73,8 @@ public class PlayerInteraction : MonoBehaviour
         if (hitInvincibleTime < 0.2f)
             hitInvincibleTime = 0.5f;
 
-        // 시작할 때 계란 상태에 맞게 스프라이트 세팅
-        UpdateEggSprite();
+        // 시작할 때 계란 상태에 맞게 애니메이션 세팅
+        UpdateEggSprite();   // 👉 이름은 그대로 두고, 내부에서 Animator만 제어
     }
 
     void Update()
@@ -94,7 +107,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 currentEggs--;
                 Debug.Log("보스에게 달걀 전달 성공! 현재: " + currentEggs);
-                UpdateEggSprite();   // ⭐ 스프라이트 갱신
+                UpdateEggSprite();   // 계란 수 변경 → 애니메이션 상태 갱신
             }
         }
         else if (currentEggs <= 0)
@@ -124,7 +137,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 currentEggs++;
                 Debug.Log("달걀 획득! 현재: " + currentEggs);
-                UpdateEggSprite();   // ⭐ 스프라이트 갱신
+                UpdateEggSprite();   // 계란 상태 변경 → 애니메이션 갱신
             }
             else
             {
@@ -153,7 +166,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 currentEggs--;
                 Debug.Log("몬스터와 충돌! 달걀 1개 잃음. 현재: " + currentEggs);
-                UpdateEggSprite();   // ⭐ 스프라이트 갱신
+                UpdateEggSprite();   // 계란 수 감소 → 애니메이션 갱신
             }
             else
             {
@@ -205,14 +218,23 @@ public class PlayerInteraction : MonoBehaviour
         spriteRenderer.color = new Color(1, 1, 1, 1);
     }
 
-    // ---------------- 계란 상태에 따른 스프라이트 변경 ----------------
+    // ---------------- 계란 상태에 따른 애니메이션 변경 ----------------
     void UpdateEggSprite()
     {
+        bool hasEgg = currentEggs > 0;
+
+        // 🔥 Animator에 계란 보유 상태 전달 (애니메이션/스프라이트 전환은 Animator에서 처리)
+        if (animator != null && !string.IsNullOrEmpty(hasEggBoolName))
+        {
+            animator.SetBool(hasEggBoolName, hasEgg);
+        }
+
+        // 👉 만약 나중에 코드로도 스프라이트 바꾸고 싶으면 아래 주석 해제해서 사용하면 됨
+        /*
         if (spriteRenderer == null)
             return;
 
-        // 0개일 때 = 기본, 1개 이상일 때 = 계란 든 스프라이트
-        if (currentEggs > 0)
+        if (hasEgg)
         {
             if (eggHoldingSprite != null)
                 spriteRenderer.sprite = eggHoldingSprite;
@@ -222,5 +244,6 @@ public class PlayerInteraction : MonoBehaviour
             if (normalSprite != null)
                 spriteRenderer.sprite = normalSprite;
         }
+        */
     }
 }

@@ -7,7 +7,7 @@ public class GridMovement : MonoBehaviour
     [Tooltip("씬에서 Grid 컴포넌트를 할당하세요. (Tilemap의 부모 객체)")]
     public Grid grid;
 
-    [Tooltip("한 칸 이동 후 다음 입력 가능까지의 딜레이 시간(초)")]
+    [Tooltip("한 칸 이동 후 다음 입력 가능까지의 딜레이 시간(초) / 이동 시간")]
     public float moveDelay = 0.2f;
 
     [Header("이동 경계 (Cell 좌표 기준)")]
@@ -19,6 +19,9 @@ public class GridMovement : MonoBehaviour
     public Animator animator;
     [Tooltip("Animator에서 사용하는 이동 여부 Bool 파라미터 이름")]
     public string moveBoolName = "IsMoving";   // Animator 파라미터 이름
+
+    [Tooltip("이동 시작 시 호출할 점프 Trigger 파라미터 이름")]
+    public string jumpTriggerName = "Jump";
 
     private bool isMoving = false;
     private Rigidbody2D rb;
@@ -90,11 +93,16 @@ public class GridMovement : MonoBehaviour
     IEnumerator MoveOneStep(Vector3 direction)
     {
         isMoving = true;
-        SetMoveAnimation(true);   // 이동 시작 → 이동 애니메이션
+        SetMoveAnimation(true);   // 이동 시작 → 이동 애니메이션 ON
+
+        // 🔥 이동 시작할 때 점프 트리거 발동
+        if (animator != null && !string.IsNullOrEmpty(jumpTriggerName))
+        {
+            animator.SetTrigger(jumpTriggerName);
+        }
 
         Vector3 startPos = transform.position;
         Vector3 targetWorld = startPos + direction * actualGridSize;
-
         Vector3Int targetCell = grid.WorldToCell(targetWorld);
 
         // 경계 체크
@@ -107,11 +115,21 @@ public class GridMovement : MonoBehaviour
             yield break;
         }
 
-        // 셀 중앙으로 이동
-        transform.position = grid.GetCellCenterWorld(targetCell);
+        // ✅ 셀의 중앙 좌표 계산
+        Vector3 endPos = grid.GetCellCenterWorld(targetCell);
 
-        // 딜레이 후 다음 입력 가능
-        yield return new WaitForSeconds(moveDelay);
+        // ✅ 순간이동 대신, moveDelay 시간 동안 부드럽게 이동
+        float elapsed = 0f;
+        while (elapsed < moveDelay)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / moveDelay);
+            transform.position = Vector3.Lerp(startPos, endPos, t);
+            yield return null;
+        }
+
+        // 마지막 위치를 정확히 셀 중앙으로 맞춰줌
+        transform.position = endPos;
 
         // 이동 끝 → Idle
         SetMoveAnimation(false);
