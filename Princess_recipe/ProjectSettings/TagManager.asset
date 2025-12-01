@@ -7,7 +7,11 @@ TagManager:
   - Stage1_Egg
   - Stage1_Monster
   - Stage1_Boss
+<<<<<<< Updated upstream
   - Stage2_Obstacle
+=======
+  - Stage3_Vine
+>>>>>>> Stashed changes
   layers:
   - Default
   - TransparentFX

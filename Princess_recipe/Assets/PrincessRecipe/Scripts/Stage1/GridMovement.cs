@@ -5,31 +5,30 @@ public class GridMovement : MonoBehaviour
 {
     [Header("그리드 설정")]
     [Tooltip("씬에서 Grid 컴포넌트를 할당하세요. (Tilemap의 부모 객체)")]
-    public Grid grid; // Tilemap의 Cell Size 정보를 가져오기 위한 Grid 컴포넌트 참조
+    public Grid grid; 
     
     [Tooltip("이동 후 다음 입력을 받기까지의 딜레이 시간(초)")]
     public float moveDelay = 0.2f; 
     
-    // --- 새로 추가된 경계 설정 변수 ---
     [Header("이동 경계 (Cell 좌표 기준)")]
-    [Tooltip("캐릭터가 이동 가능한 최소 셀 좌표 (예: X=-5, Y=-3)")]
     public Vector2Int minBounds = new Vector2Int(-10, -10);
-    [Tooltip("캐릭터가 이동 가능한 최대 셀 좌표 (예: X=5, Y=3)")]
     public Vector2Int maxBounds = new Vector2Int(10, 10);
-    
-    // ------------------------------------
+
+    [Header("애니메이션 설정")]
+    [Tooltip("플레이어 Animator를 넣어주세요.")]
+    public Animator animator;
+    [Tooltip("Animator에서 사용하는 이동 여부 Bool 파라미터 이름")]
+    public string moveBoolName = "IsMoving";   // Animator 파라미터 이름
 
     private bool isMoving = false;
     private Rigidbody2D rb; 
     private float actualGridSize; 
     
-    // 🌟 추가: Sprite Renderer 컴포넌트 참조 변수
     private SpriteRenderer spriteRenderer; 
 
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // 🌟 추가: SpriteRenderer 컴포넌트를 가져옵니다.
         spriteRenderer = GetComponent<SpriteRenderer>(); 
         
         if (rb != null)
@@ -41,16 +40,15 @@ public class GridMovement : MonoBehaviour
         {
             actualGridSize = grid.cellSize.x;
             Debug.Log($"Tilemap Grid Size가 {actualGridSize}로 설정되었습니다.");
-
-            // 🌟 이전에 추가했다면 이 초기 위치 보정 코드를 제거하거나 주석 처리하세요. 🌟
-            // Vector3Int startCell = grid.WorldToCell(transform.position);
-            // transform.position = grid.GetCellCenterWorld(startCell);
         }
         else
         {
             actualGridSize = 1f; 
             Debug.LogError("Grid 컴포넌트가 할당되지 않았습니다. 기본 Grid Size (1.0f)를 사용합니다.");
         }
+
+        // 시작할 때는 Idle이므로 false
+        SetMoveAnimation(false);
     }
     
     void Update()
@@ -60,48 +58,41 @@ public class GridMovement : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
         
-        // 🌟 추가: 방향 전환 (Flip) 로직
+        // 방향에 따라 좌우 반전
         if (spriteRenderer != null)
         {
             if (h > 0)
-            {
-                // 오른쪽으로 이동: Flip을 끕니다. (정방향)
-                spriteRenderer.flipX = true;
-            }
+                spriteRenderer.flipX = true;   // 오른쪽
             else if (h < 0)
-            {
-                // 왼쪽으로 이동: Flip을 켬으로써 캐릭터를 반전시킵니다.
-                spriteRenderer.flipX = false;
-            }
+                spriteRenderer.flipX = false;  // 왼쪽
         }
-        // -----------------------
 
         // 대각선 이동 금지
         if (h != 0 && v != 0)
-        {
             return;
-        }
 
         Vector3 moveDirection = Vector3.zero;
 
         if (h != 0)
-        {
             moveDirection = new Vector3(h, 0, 0);
-        }
         else if (v != 0)
-        {
             moveDirection = new Vector3(0, v, 0);
-        }
 
         if (moveDirection != Vector3.zero)
         {
             StartCoroutine(MoveOneStep(moveDirection));
+        }
+        else
+        {
+            // 입력이 전혀 없고, 이동도 안 하는 상태면 Idle 유지
+            SetMoveAnimation(false);
         }
     }
 
     IEnumerator MoveOneStep(Vector3 direction)
     {
         isMoving = true;
+        SetMoveAnimation(true);   // 🔥 이동 시작 → Jump 애니메이션(이동 애니메이션) 재생
 
         // 1. 다음 목표 월드 위치 계산
         Vector3 targetWorldPosition = transform.position + direction * actualGridSize;
@@ -109,23 +100,32 @@ public class GridMovement : MonoBehaviour
         // 2. 목표 월드 위치를 셀 좌표로 변환
         Vector3Int targetCell = grid.WorldToCell(targetWorldPosition);
 
-        // 3. --- 경계 확인 로직 ---
+        // 3. 경계 확인
         if (targetCell.x < minBounds.x || targetCell.x > maxBounds.x || 
             targetCell.y < minBounds.y || targetCell.y > maxBounds.y)
         {
-            // 경계를 벗어났다면, 이동하지 않고 즉시 코루틴 종료
             isMoving = false;
+            SetMoveAnimation(false);   // 이동 실패 → Idle
             Debug.Log("그리드 경계 밖이므로 이동할 수 없습니다.");
-            yield break; // 코루틴을 여기서 중단합니다.
+            yield break;
         }
-        // -----------------------
         
-        // 4. 경계 내에 있다면 이동 실행 (실제 이동 시에는 셀 중앙으로 보정하는 것이 좋습니다)
-        // 캐릭터 위치를 목표 셀의 중앙으로 이동시킵니다.
+        // 4. 실제 이동 (셀 중앙으로 스냅)
         transform.position = grid.GetCellCenterWorld(targetCell); 
 
+        // 한 칸 이동한 동안만 jump 애니메이션 보여주고
         yield return new WaitForSeconds(moveDelay);
 
         isMoving = false;
+        SetMoveAnimation(false);  // 이동 끝 → Idle
+    }
+
+    // Animator bool 제어 함수
+    void SetMoveAnimation(bool moving)
+    {
+        if (animator != null && !string.IsNullOrEmpty(moveBoolName))
+        {
+            animator.SetBool(moveBoolName, moving);
+        }
     }
 }

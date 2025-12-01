@@ -19,7 +19,7 @@ public class BossController : MonoBehaviour
 
     [Header("몬스터 난이도 조절")]
     // 🌟 추가: 달걀 1개당 증가시킬 몬스터 이동 속도 값
-    public float monsterSpeedIncreasePerEgg = 1.0f;
+    public float monsterSpeedIncreasePerEgg = 0.5f;
 
     void Awake()
     {

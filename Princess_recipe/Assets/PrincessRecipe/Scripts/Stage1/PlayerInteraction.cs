@@ -1,59 +1,100 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
-    // ... (기존 변수 유지) ...
     [Header("리스폰 설정")]
-    public Vector3 respawnPosition = new Vector3(0, 0, 0); 
-    private Rigidbody2D rb; 
+    public Vector3 respawnPosition = new Vector3(0, 0, 0);
+    private Rigidbody2D rb;
 
     [Header("달걀 설정")]
-    public int currentEggs = 0;    
-    public int maxEggs = 1;        
-    public int minEggs = 0;        
-    
-    // 보스 상호작용 관련 변수
-    private BossController nearbyBoss = null; 
+    public int currentEggs = 0;
+    public int maxEggs = 1;
+    public int minEggs = 0;
 
-    // 🌟 추가: GameManager 참조
+    [Header("피격 무적 설정")]
+    [Tooltip("몬스터에 맞은 후 무적 유지 시간(초)")]
+    public float hitInvincibleTime = 1.5f;
+    private bool isInvincible = false;
+    private float invincibleTimer = 0f;
+
+    [Header("피격 깜빡임 설정")]
+    [Tooltip("플레이어가 깜빡이는 속도(초)")]
+    public float blinkInterval = 0.1f;
+
+    [Header("플레이어 스프라이트 설정")]
+    [Tooltip("플레이어 스프라이트가 자식에 있다면 여기 직접 넣어주세요.")]
+    public SpriteRenderer targetRenderer;
+    [Tooltip("계란을 들고 있지 않을 때의 기본 스프라이트")]
+    public Sprite normalSprite;
+    [Tooltip("계란을 들고 있을 때의 스프라이트")]
+    public Sprite eggHoldingSprite;
+
+    private BossController nearbyBoss = null;
     private GameManagerStage1 gameManager;
+    private SpriteRenderer spriteRenderer;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>(); 
-        respawnPosition = transform.position; 
-        
-        // 🌟 추가: GameManager 참조 가져오기
-        //FindObjectOfType 2024ver 이후로 Deprecated 되어 warning 떠서 수정했습니다.
+        rb = GetComponent<Rigidbody2D>();
+
+        // SpriteRenderer 찾기 (직접 지정 > 자식에서 찾기 > 자기 자신)
+        if (targetRenderer != null)
+            spriteRenderer = targetRenderer;
+        else
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        if (spriteRenderer == null)
+        {
+            Debug.LogError("PlayerInteraction: SpriteRenderer를 찾을 수 없습니다.", this);
+        }
+
+        respawnPosition = transform.position;
+
         gameManager = FindAnyObjectByType<GameManagerStage1>();
         if (gameManager == null)
         {
             Debug.LogError("GameManagerStage1을 씬에서 찾을 수 없습니다.");
         }
+
+        if (hitInvincibleTime < 0.2f)
+            hitInvincibleTime = 0.5f;
+
+        // 시작할 때 계란 상태에 맞게 스프라이트 세팅
+        UpdateEggSprite();
     }
 
     void Update()
     {
-        // 🌟 수정: GiveEggToBoss 로직 (오류 발생 부분)
+        if (isInvincible)
+        {
+            invincibleTimer -= Time.deltaTime;
+            if (invincibleTimer <= 0f)
+            {
+                isInvincible = false;
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.color = new Color(1, 1, 1, 1);
+                }
+            }
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && nearbyBoss != null)
         {
             GiveEggToBoss();
         }
     }
 
-    /// <summary>
-    /// 현재 소유한 달걀을 근처 보스에게 전달합니다. (누락된 메서드 추가)
-    /// </summary>
+    // ---------------- 보스에게 달걀 전달 ----------------
     void GiveEggToBoss()
     {
         if (currentEggs > 0 && nearbyBoss != null)
         {
-            // 달걀을 보스에게 전달 시도
-            // BossController 스크립트에 ReceiveEgg() 메서드가 있어야 작동합니다.
-            if (nearbyBoss.ReceiveEgg()) 
+            if (nearbyBoss.ReceiveEgg())
             {
                 currentEggs--;
                 Debug.Log("보스에게 달걀 전달 성공! 현재: " + currentEggs);
+                UpdateEggSprite();   // ⭐ 스프라이트 갱신
             }
         }
         else if (currentEggs <= 0)
@@ -62,87 +103,124 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 플레이어를 리스폰 위치로 이동시키고 상태를 초기화합니다.
-    /// </summary>
+    // ---------------- (선택적) 리스폰 함수 ----------------
     void Respawn()
     {
-        // 1. 플레이어 위치를 리스폰 지점으로 이동
         transform.position = respawnPosition;
-        
-        // 2. 달걀 수 초기화 (충돌 로직에서 이미 처리되므로 여기서는 위치만)
-        
-        // 3. Rigidbody 속도 초기화 (충돌 후 관성 제거)
+
         if (rb != null)
-        {
-            // RigidbodyType2D.Kinematic을 사용하면 linearVelocity 대신 velocity를 사용하는 것이 일반적입니다.
-            rb.linearVelocity = Vector2.zero; 
-        }
-        
-        Debug.Log("몬스터와 충돌하여 시작 지점(" + respawnPosition + ")으로 리스폰되었습니다.");
+            rb.linearVelocity = Vector2.zero;
+
+        Debug.Log("리스폰 위치(" + respawnPosition + ")로 이동했습니다.");
     }
-        
-    // 충돌 처리
+
+    // ---------------- 충돌 처리 ----------------
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // 1. 일반 달걀 획득 로직
+        // 1. 달걀 획득
         if (collision.CompareTag("Stage1_Egg"))
         {
             if (currentEggs < maxEggs)
             {
-                currentEggs += 1;
+                currentEggs++;
                 Debug.Log("달걀 획득! 현재: " + currentEggs);
+                UpdateEggSprite();   // ⭐ 스프라이트 갱신
             }
             else
             {
                 Debug.Log("달걀 최대 보유량 도달!");
             }
-            // 획득 후 달걀 오브젝트 파괴 로직이 필요할 수 있습니다. 
+
+            // 필요하면 실제 달걀 오브젝트 제거
             // Destroy(collision.gameObject);
         }
 
-        // 2. 몬스터 충돌 로직 (HP 감소 및 리스폰)
+        // 2. 몬스터 충돌
         if (collision.CompareTag("Stage1_Monster"))
         {
-            if (gameManager != null)
+            if (isInvincible)
             {
-                gameManager.TakeDamage(); // HP 1 감소 및 HUD 업데이트
+                Debug.Log("무적 상태라 몬스터 충돌 무시");
+                return;
             }
 
-            if (currentEggs == maxEggs)
+            Debug.Log("몬스터에게 피격!");
+
+            if (gameManager != null)
+                gameManager.TakeDamage();
+
+            if (currentEggs > minEggs)
             {
-                // 달걀이 있을 경우 달걀을 잃음
-                currentEggs = minEggs; 
-                Respawn();
+                currentEggs--;
+                Debug.Log("몬스터와 충돌! 달걀 1개 잃음. 현재: " + currentEggs);
+                UpdateEggSprite();   // ⭐ 스프라이트 갱신
             }
             else
             {
-                // 달걀이 없을 경우
-                Respawn();
+                Debug.Log("몬스터와 충돌했지만 가지고 있는 달걀이 없습니다.");
             }
+
+            StartInvincibility();
         }
 
-        // 3. 보스 진입 시 nearbyBoss 설정
+        // 3. 보스 구역 진입
         if (collision.CompareTag("Stage1_Boss"))
         {
             nearbyBoss = collision.GetComponent<BossController>();
             if (nearbyBoss != null)
-            {
-                Debug.Log("보스 근처에 진입했습니다. Space 키로 달걀을 전달할 수 있습니다.");
-            }
+                Debug.Log("보스 근처에 진입했습니다. Space 키로 달걀 전달 가능.");
         }
     }
 
-    // 보스 구역 이탈 시 nearbyBoss 해제
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Stage1_Boss"))
+        if (collision.CompareTag("Stage1_Boss") && nearbyBoss != null)
         {
-            if (nearbyBoss != null)
-            {
-                nearbyBoss = null;
-                Debug.Log("보스 구역에서 벗어났습니다.");
-            }
+            nearbyBoss = null;
+            Debug.Log("보스 구역에서 벗어났습니다.");
+        }
+    }
+
+    // ---------------- 피격 무적 + 깜빡임 ----------------
+    void StartInvincibility()
+    {
+        isInvincible = true;
+        invincibleTimer = hitInvincibleTime;
+
+        if (spriteRenderer != null)
+            StartCoroutine(HitBlink());
+    }
+
+    private IEnumerator HitBlink()
+    {
+        while (isInvincible)
+        {
+            spriteRenderer.color = new Color(1, 1, 1, 0.3f);
+            yield return new WaitForSeconds(blinkInterval);
+
+            spriteRenderer.color = new Color(1, 1, 1, 1f);
+            yield return new WaitForSeconds(blinkInterval);
+        }
+
+        spriteRenderer.color = new Color(1, 1, 1, 1);
+    }
+
+    // ---------------- 계란 상태에 따른 스프라이트 변경 ----------------
+    void UpdateEggSprite()
+    {
+        if (spriteRenderer == null)
+            return;
+
+        // 0개일 때 = 기본, 1개 이상일 때 = 계란 든 스프라이트
+        if (currentEggs > 0)
+        {
+            if (eggHoldingSprite != null)
+                spriteRenderer.sprite = eggHoldingSprite;
+        }
+        else
+        {
+            if (normalSprite != null)
+                spriteRenderer.sprite = normalSprite;
         }
     }
 }
