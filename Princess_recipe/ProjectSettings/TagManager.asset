@@ -8,7 +8,11 @@ TagManager:
   - Stage1_Monster
   - Stage1_Boss
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
   - Stage2_Obstacle
+=======
+  - Stage3_Vine
+>>>>>>> Stashed changes
 =======
   - Stage3_Vine
 >>>>>>> Stashed changes

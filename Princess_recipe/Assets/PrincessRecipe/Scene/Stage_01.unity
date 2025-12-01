@@ -4741,12 +4741,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 1768024314}
+<<<<<<< Updated upstream
   moveSpeed: 0.15
   minBounds: {x: -6, y: -5}
   maxBounds: {x: 4, y: 24}
   animator: {fileID: 0}
   idleStateName: Princess_Idle
   moveStateName: Princess_Jump
+=======
+  moveDelay: 0.2
+  minBounds: {x: -6, y: -5}
+  maxBounds: {x: 4, y: 24}
+  animator: {fileID: 0}
+  moveBoolName: IsMoving
+>>>>>>> Stashed changes
 --- !u!95 &1254682389
 Animator:
   serializedVersion: 7
@@ -4787,9 +4795,15 @@ MonoBehaviour:
   minEggs: 0
   hitInvincibleTime: 1.5
   blinkInterval: 0.1
+<<<<<<< Updated upstream
   targetRenderer: {fileID: 1254682386}
   normalSprite: {fileID: 21300000, guid: 04d8e54af9bfa8e4abf69d156570cd2f, type: 3}
   eggHoldingSprite: {fileID: 21300000, guid: 86354e0e59c12d144ada6116c28512f2, type: 3}
+=======
+  targetRenderer: {fileID: 0}
+  normalSprite: {fileID: 0}
+  eggHoldingSprite: {fileID: 0}
+>>>>>>> Stashed changes
 --- !u!1 &1264479296
 GameObject:
   m_ObjectHideFlags: 0
