@@ -1,155 +1,224 @@
 using UnityEngine;
+using System.Collections;
 
-
-
-
-
-// 체스판 한 칸씩 이동 + 입력 버퍼 처리
+// Grid 기반 셀 단위 이동 + 무적/깜빡임 + 벽 감지
 public class PrincessControllerStage2 : MonoBehaviour
 {
-    [Header("이동 설정")]
-    public float moveSpeed = 12f;     // 한 칸 이동 속도 (조금 빠르게 해두면 답답함 줄어듦)
-    public float stepSize = 1f;       // 한 칸 크기 (Grid 셀 크기와 동일하게)
+    [Header("그리드 설정")]
+    [Tooltip("플레이어가 움직일 Grid (Tilemap의 부모)")]
+    public Grid grid;
+    [Tooltip("한 칸 이동에 걸리는 시간(초)")]
+    public float moveTime = 0.15f;
 
-    [Header("충돌 설정")]
-    public LayerMask obstacleLayer;     // 벽/장애물 레이어
-    public float collisionRadius = 0.3f; // 목적지 체크 반경
+    [Header("이동 경계 (Cell 좌표 기준)")]
+    public Vector2Int minBounds = new Vector2Int(-10, -10);
+    public Vector2Int maxBounds = new Vector2Int(10, 10);
 
-    private bool isMoving = false;    // 현재 이동 중인지
-    private Vector3 targetPos;        // 이번에 도착해야 할 목표 위치
+    [Header("벽 / 장애물 설정")]
+    [Tooltip("벽/블럭이 속한 레이어 (Stage2_Obstacle 등)")]
+    public LayerMask obstacleLayer;
+    [Tooltip("목적 셀 중심에서 이 반경 안에 장애물이 있으면 막힌 것으로 판단")]
+    public float collisionRadius = 0.1f;
 
-    // 이동 중에 눌린 키를 한 번 저장해두는 버퍼
-    private bool hasBufferedInput = false;
-    private Vector2 bufferedDir = Vector2.zero;
+    [Header("무적 / 깜빡임 설정")]
+    public float invincibleDuration = 3f;
+    public float blinkInterval = 0.1f;
+    [Tooltip("벽/블럭에 붙어 있는 태그 이름")]
+    public string obstacleTag = "Stage2_Obstacle";
 
+    private bool isMoving = false;
+    private bool isInvincible = false;
+    private Coroutine invincibleRoutine = null;
+
+    private Vector3Int currentCell;
     private SpriteRenderer spriteRenderer;
+    private Rigidbody2D rb;
 
     void Start()
     {
-        targetPos = transform.position;
+        rb = GetComponent<Rigidbody2D>();
+        if (rb != null)
+        {
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            rb.gravityScale = 0f;
+            rb.freezeRotation = true;
+        }
+
+        // 스프라이트 찾기
         spriteRenderer = GetComponent<SpriteRenderer>();
-        Debug.Log("[PrincessControllerStage2] 시작 위치: " + targetPos);
+        if (spriteRenderer == null)
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        if (grid == null)
+        {
+            Debug.LogError("[PrincessControllerStage2] Grid가 설정되지 않았습니다!");
+            return;
+        }
+
+        // 시작 위치를 그리드 셀 중앙에 스냅
+        currentCell = grid.WorldToCell(transform.position);
+        Vector3 center = grid.GetCellCenterWorld(currentCell);
+        transform.position = center;
+
+        // ➕ 콜라이더 자동 사이즈 조정 (그리드에 맞춰줌)
+        var box = GetComponent<BoxCollider2D>();
+        if (box != null)
+        {
+            Vector3 cellSize = grid.cellSize;
+            // 셀보다 살짝 작은 0.8배 크기 → 모서리 끼임 방지
+            box.size = new Vector2(cellSize.x * 0.8f, cellSize.y * 0.8f);
+            box.offset = Vector2.zero;
+        }
+
+        Debug.Log("[PrincessControllerStage2] 시작 셀: " + currentCell);
     }
 
     void Update()
     {
-        // 항상 키 입력은 체크한다 (이동 중일 땐 버퍼에 저장)
-        Vector2 dir = Vector2.zero;
-        bool pressed = false;
+        if (grid == null) return;
+        if (isMoving) return;
 
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            dir = Vector2.up;
-            pressed = true;
-            Debug.Log("W 입력: 위로 한 칸");
-        }
-        else if (Input.GetKeyDown(KeyCode.S))
-        {
-            dir = Vector2.down;
-            pressed = true;
-            Debug.Log("S 입력: 아래로 한 칸");
-        }
-        else if (Input.GetKeyDown(KeyCode.A))
-        {
-            dir = Vector2.left;
-            pressed = true;
-            Debug.Log("A 입력: 왼쪽으로 한 칸");
-        }
-        else if (Input.GetKeyDown(KeyCode.D))
-        {
-            dir = Vector2.right;
-            pressed = true;
-            Debug.Log("D 입력: 오른쪽으로 한 칸");
-        }
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
 
-        if (pressed)
-        {
-            if (!isMoving)
-            {
-                // 이동 중이 아니면 바로 이동 시작
-                StartMove(dir);
-            }
-            else
-            {
-                // 이동 중이면 입력을 버퍼에 저장 (마지막 입력 1개만)
-                bufferedDir = dir;
-                hasBufferedInput = true;
-                Debug.Log("[PrincessControllerStage2] 이동 중 입력 → 버퍼에 저장됨: " + bufferedDir);
-            }
-        }
-
-        // 이동 진행은 FixedUpdate에서 함
-    }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.collider.CompareTag("Stage2_Obstacle"))
-        {
-            GameManagerStage2.Instance.TakeDamage(1);
-        }
-    }
-
-
-    void FixedUpdate()
-    {
-        if (!isMoving)
+        // 대각선 입력 방지
+        if (h != 0 && v != 0)
             return;
 
-        // 목표 위치까지 부드럽게 이동
-        transform.position = Vector3.MoveTowards(
-            transform.position,
-            targetPos,
-            moveSpeed * Time.fixedDeltaTime
-        );
+        Vector3Int nextCell = currentCell;
+        Vector2 dir = Vector2.zero;
 
-        // 목표 위치에 거의 도착했다면
-        if (Vector3.Distance(transform.position, targetPos) < 0.001f)
+        if (h > 0.1f)
         {
-            transform.position = targetPos;
-            isMoving = false;
-            Debug.Log("[PrincessControllerStage2] 이동 완료, 현재 위치: " + transform.position);
-
-            // 이동이 끝난 직후, 버퍼에 입력이 있으면 바로 다음 이동 시작
-            if (hasBufferedInput)
-            {
-                Vector2 dir = bufferedDir;
-                hasBufferedInput = false;   // 버퍼 비우기
-                StartMove(dir);
-                Debug.Log("[PrincessControllerStage2] 버퍼 입력 사용, 다음 이동 시작: " + dir);
-            }
+            nextCell += Vector3Int.right;
+            dir = Vector2.right;
         }
-    }
-
-    void StartMove(Vector2 dir)
-    {
-        if (dir == Vector2.zero) return;
-
-        // 1) 목적지 계산
-        Vector3 dest = transform.position + (Vector3)(dir * stepSize);
-
-        // 2) 목적지에 벽이 있는지 미리 확인 (이동 시작 전에 체크)
-        bool blocked = Physics2D.OverlapCircle(dest, collisionRadius, obstacleLayer) != null;
-        if (blocked)
+        else if (h < -0.1f)
         {
-            Debug.Log("[PrincessControllerStage2] 벽에 막혀서 이동 취소: " + dest);
-            return; // 아예 이동 시작을 안 함 → isMoving 그대로 false
+            nextCell += Vector3Int.left;
+            dir = Vector2.left;
+        }
+        else if (v > 0.1f)
+        {
+            nextCell += Vector3Int.up;
+            dir = Vector2.up;
+        }
+        else if (v < -0.1f)
+        {
+            nextCell += Vector3Int.down;
+            dir = Vector2.down;
         }
 
-        // 3) 이동 시작
-        targetPos = dest;
-        isMoving = true;
+        if (dir == Vector2.zero)
+            return;
 
-        // 좌우 방향에 따라 스프라이트 뒤집기
+        // 좌우 방향에 따라 스프라이트 반전
         if (spriteRenderer != null)
         {
-            // 기본이 왼쪽 보게 그려졌다고 가정
-            if (dir.x > 0.01f)
-                spriteRenderer.flipX = true;   // 오른쪽 이동
-            else if (dir.x < -0.01f)
-                spriteRenderer.flipX = false;  // 왼쪽 이동
+            if (dir.x > 0.1f) spriteRenderer.flipX = true;
+            else if (dir.x < -0.1f) spriteRenderer.flipX = false;
         }
 
-        Debug.Log("[PrincessControllerStage2] 새 목표 위치: " + targetPos);
+        // 경계 체크
+        if (nextCell.x < minBounds.x || nextCell.x > maxBounds.x ||
+            nextCell.y < minBounds.y || nextCell.y > maxBounds.y)
+        {
+            Debug.Log("[PrincessControllerStage2] 경계 밖으로 이동 불가: " + nextCell);
+            return;
+        }
+
+        // 목적 셀의 월드 중앙 좌표
+        Vector3 targetPos = grid.GetCellCenterWorld(nextCell);
+
+        // 이동하기 전에 그 셀에 장애물이 있는지 레이어로 체크
+        Collider2D hit = Physics2D.OverlapCircle(targetPos, collisionRadius, obstacleLayer);
+        if (hit != null)
+        {
+            Debug.Log($"[PrincessControllerStage2] 이동 취소 – 장애물({hit.name}) 때문에 막힘, 셀 {nextCell}");
+            // 여기서 "부딪힌 느낌" 이펙트/사운드 재생해도 됨
+            return;
+        }
+
+        // 실제 이동 코루틴 시작
+        StartCoroutine(MoveToCell(nextCell, targetPos));
     }
 
+    IEnumerator MoveToCell(Vector3Int nextCell, Vector3 targetPos)
+    {
+        isMoving = true;
+        Vector3 startPos = transform.position;
+        float elapsed = 0f;
+
+        while (elapsed < moveTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / moveTime);
+            Vector3 newPos = Vector3.Lerp(startPos, targetPos, t);
+
+            if (rb != null)
+                rb.MovePosition(newPos);
+            else
+                transform.position = newPos;
+
+            yield return null;
+        }
+
+        if (rb != null)
+            rb.MovePosition(targetPos);
+        else
+            transform.position = targetPos;
+
+        currentCell = grid.WorldToCell(targetPos);
+        isMoving = false;
+    }
+
+    // 벽/블럭(Trigger)에 닿았을 때 – 데미지 + 무적
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (!other.CompareTag(obstacleTag))
+            return;
+
+        Debug.Log("[PrincessControllerStage2] OnTriggerEnter2D: " + other.name);
+
+        if (isInvincible)
+        {
+            Debug.Log("[PrincessControllerStage2] 무적 상태라 데미지 무시");
+            return;
+        }
+
+        GameManagerStage2.Instance.TakeDamage(1);
+        Debug.Log("[PrincessControllerStage2] 데미지 1");
+
+        if (invincibleRoutine != null)
+            StopCoroutine(invincibleRoutine);
+
+        invincibleRoutine = StartCoroutine(InvincibleRoutine());
+    }
+
+    IEnumerator InvincibleRoutine()
+    {
+        isInvincible = true;
+        float elapsed = 0f;
+
+        while (elapsed < invincibleDuration)
+        {
+            if (spriteRenderer != null)
+                spriteRenderer.enabled = false;
+
+            yield return new WaitForSeconds(blinkInterval);
+
+            if (spriteRenderer != null)
+                spriteRenderer.enabled = true;
+
+            yield return new WaitForSeconds(blinkInterval);
+
+            elapsed += blinkInterval * 2f;
+        }
+
+        if (spriteRenderer != null)
+            spriteRenderer.enabled = true;
+
+        isInvincible = false;
+        invincibleRoutine = null;
+    }
 }

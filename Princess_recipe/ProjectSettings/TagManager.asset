@@ -7,11 +7,12 @@ TagManager:
   - Stage1_Monster
   - Stage1_Egg
   - Stage1_Boss
+  - Stage2_Obstacle
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Stage2_Obstacle
   - Water
   - UI
   - 
