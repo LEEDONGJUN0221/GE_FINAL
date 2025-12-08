@@ -24,12 +24,20 @@ public class GridMovement : MonoBehaviour
     [Header("이펙트 설정")]
     public GameObject dustPrefab;
     public float dustLifetime = 0.5f;
-    public float dustOffsetY = -0.1f;
+
+    [Tooltip("왼쪽으로 이동할 때 먼지 위치 오프셋")]
+    public Vector2 dustOffsetLeft = new Vector2(-0.1f, -0.1f);
+    [Tooltip("오른쪽으로 이동할 때 먼지 위치 오프셋")]
+    public Vector2 dustOffsetRight = new Vector2(0.1f, -0.1f);
+    [Tooltip("위로 이동할 때 먼지 위치 오프셋")]
+    public Vector2 dustOffsetUp = new Vector2(0f, -0.05f);
+    [Tooltip("아래로 이동할 때 먼지 위치 오프셋")]
+    public Vector2 dustOffsetDown = new Vector2(0f, -0.15f);
 
     [Header("사운드 설정")]
     [Tooltip("발자국 / 이동 효과음 클립")]
-    public AudioClip moveSound;      // ★ 추가
-    private AudioSource audioSource; // ★ 추가
+    public AudioClip moveSound;
+    private AudioSource audioSource;
 
     private bool isMoving = false;
     private Rigidbody2D rb;
@@ -41,7 +49,6 @@ public class GridMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // ★ AudioSource 자동 연결 (없으면 자동 추가)
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -64,12 +71,14 @@ public class GridMovement : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
+        // 플레이어 좌우 flip
         if (spriteRenderer != null)
         {
             if (h > 0) spriteRenderer.flipX = true;
             else if (h < 0) spriteRenderer.flipX = false;
         }
 
+        // 대각선 이동 금지
         if (h != 0 && v != 0)
             return;
 
@@ -92,6 +101,7 @@ public class GridMovement : MonoBehaviour
         Vector3 targetWorld = startPos + direction * actualGridSize;
         Vector3Int targetCell = grid.WorldToCell(targetWorld);
 
+        // 경계 체크
         if (targetCell.x < minBounds.x || targetCell.x > maxBounds.x ||
             targetCell.y < minBounds.y || targetCell.y > maxBounds.y)
         {
@@ -102,6 +112,7 @@ public class GridMovement : MonoBehaviour
 
         Vector3 endPos = grid.GetCellCenterWorld(targetCell);
 
+        // 장애물 체크
         if (IsBlockedByObstacle(endPos))
         {
             SetMoveAnimation(false);
@@ -109,10 +120,10 @@ public class GridMovement : MonoBehaviour
             yield break;
         }
 
-        // 먼지 이펙트
-        SpawnDustAtPosition(startPos);
+        // 먼지 이펙트 (방향 정보 넘김)
+        SpawnDustAtPosition(startPos, direction);
 
-        // ★ 이동 효과음 재생
+        // 이동 효과음
         if (moveSound != null)
             audioSource.PlayOneShot(moveSound);
 
@@ -136,17 +147,51 @@ public class GridMovement : MonoBehaviour
             animator.SetBool(moveBoolName, moving);
     }
 
-    void SpawnDustAtPosition(Vector3 worldPos)
+    // 방향 기반으로 오프셋/flip 적용
+    void SpawnDustAtPosition(Vector3 worldPos, Vector3 direction)
     {
-        if (dustPrefab == null || grid == null)
-            return;
+        if (dustPrefab == null || grid == null) return;
 
+        // 기본 위치: 떠난 칸의 셀 중앙
         Vector3Int cell = grid.WorldToCell(worldPos);
         Vector3 center = grid.GetCellCenterWorld(cell);
-        center.y += dustOffsetY;
+
+        // 어떤 방향으로 이동했는지에 따라 오프셋 결정
+        Vector2 offset = Vector2.zero;
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+        {
+            if (direction.x > 0)
+                offset = dustOffsetRight;
+            else if (direction.x < 0)
+                offset = dustOffsetLeft;
+        }
+        else
+        {
+            if (direction.y > 0)
+                offset = dustOffsetUp;
+            else if (direction.y < 0)
+                offset = dustOffsetDown;
+        }
+
+        center += new Vector3(offset.x, offset.y, 0f);
 
         GameObject dust = Instantiate(dustPrefab, center, Quaternion.identity);
+
+        // ★ flip 처리 (좌우 + 상하)
+        SpriteRenderer sr = dust.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            // 좌우 flip
+            if (direction.x > 0) sr.flipX = true;
+            else if (direction.x < 0) sr.flipX = false;
+
+            // 상하 flip (요청사항)
+            if (direction.y > 0) sr.flipY = true;       // 위로 이동 → flipY
+            else if (direction.y < 0) sr.flipY = false; // 아래 → 기본
+        }
+
         if (dustLifetime > 0f)
             Destroy(dust, dustLifetime);
     }
+
 }
