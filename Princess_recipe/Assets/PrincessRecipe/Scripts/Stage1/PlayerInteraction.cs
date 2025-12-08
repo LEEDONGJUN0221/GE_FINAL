@@ -13,25 +13,31 @@ public class PlayerInteraction : MonoBehaviour
     public int minEggs = 0;
 
     [Header("피격 무적 설정")]
-    [Tooltip("몬스터에 맞은 후 무적 유지 시간(초)")]
     public float hitInvincibleTime = 1.5f;
     private bool isInvincible = false;
     private float invincibleTimer = 0f;
 
     [Header("피격 깜빡임 설정")]
-    [Tooltip("플레이어가 깜빡이는 속도(초)")]
     public float blinkInterval = 0.1f;
 
     [Header("플레이어 스프라이트 설정")]
-    [Tooltip("플레이어 스프라이트가 자식에 있다면 여기 직접 넣어주세요.")]
     public SpriteRenderer targetRenderer;
 
-    // 🔥 애니메이션 설정 (계란 보유 여부에 따라 상태 전환)
+    // 🔥 애니메이션 설정
     [Header("애니메이션 설정")]
-    [Tooltip("플레이어 Animator (계란 보유 애니메이션 전환용)")]
     public Animator animator;
-    [Tooltip("계란 보유 여부 Bool 파라미터 이름")]
     public string hasEggBoolName = "HasEgg";
+
+    [Header("사운드 설정")]
+    [Tooltip("계란 획득 시 재생할 사운드")]
+    public AudioClip eggGetSound;
+    [Tooltip("보스에게 달걀 전달 성공 시 재생할 사운드")]
+    public AudioClip bossGiveEggSound;
+    [Tooltip("몬스터에게 피격 시 재생할 사운드")]
+    public AudioClip hitByMonsterSound;
+    [Range(0f, 1f)]
+    public float soundVolume = 1f;
+    private AudioSource audioSource;
 
     private BossController nearbyBoss = null;
     private GameManagerStage1 gameManager;
@@ -41,40 +47,29 @@ public class PlayerInteraction : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
 
-        // SpriteRenderer 찾기 (직접 지정 > 자식에서 찾기 > 자기 자신)
+        // SpriteRenderer 설정
         if (targetRenderer != null)
             spriteRenderer = targetRenderer;
         else
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
 
-        if (spriteRenderer == null)
-        {
-            Debug.LogError("PlayerInteraction: SpriteRenderer를 찾을 수 없습니다.", this);
-        }
-
-        // Animator 자동 찾기 (인스펙터에서 안 넣어도 되게)
+        // Animator 설정
         if (animator == null)
-        {
             animator = GetComponentInChildren<Animator>();
-            if (animator == null)
-            {
-                Debug.LogWarning("PlayerInteraction: Animator를 찾지 못했습니다. HasEgg 애니메이션은 동작하지 않습니다.", this);
-            }
+
+        // AudioSource 자동 세팅
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
         }
 
         respawnPosition = transform.position;
 
         gameManager = FindAnyObjectByType<GameManagerStage1>();
-        if (gameManager == null)
-        {
-            Debug.LogError("GameManagerStage1을 씬에서 찾을 수 없습니다.");
-        }
 
-        if (hitInvincibleTime < 0.2f)
-            hitInvincibleTime = 0.5f;
-
-        // 시작할 때 계란 상태에 맞게 애니메이션 세팅
-        UpdateEggSprite();   // 👉 이름은 그대로 두고, 내부에서 Animator만 제어
+        UpdateEggSprite();
     }
 
     void Update()
@@ -85,10 +80,7 @@ public class PlayerInteraction : MonoBehaviour
             if (invincibleTimer <= 0f)
             {
                 isInvincible = false;
-                if (spriteRenderer != null)
-                {
-                    spriteRenderer.color = new Color(1, 1, 1, 1);
-                }
+                spriteRenderer.color = new Color(1, 1, 1, 1);
             }
         }
 
@@ -106,25 +98,12 @@ public class PlayerInteraction : MonoBehaviour
             if (nearbyBoss.ReceiveEgg())
             {
                 currentEggs--;
-                Debug.Log("보스에게 달걀 전달 성공! 현재: " + currentEggs);
-                UpdateEggSprite();   // 계란 수 변경 → 애니메이션 상태 갱신
+                UpdateEggSprite();
+
+                // ▶ 보스에게 달걀 전달 성공 사운드
+                PlaySound(bossGiveEggSound);
             }
         }
-        else if (currentEggs <= 0)
-        {
-            Debug.Log("전달할 달걀이 없습니다.");
-        }
-    }
-
-    // ---------------- (선택적) 리스폰 함수 ----------------
-    void Respawn()
-    {
-        transform.position = respawnPosition;
-
-        if (rb != null)
-            rb.linearVelocity = Vector2.zero;
-
-        Debug.Log("리스폰 위치(" + respawnPosition + ")로 이동했습니다.");
     }
 
     // ---------------- 충돌 처리 ----------------
@@ -136,28 +115,20 @@ public class PlayerInteraction : MonoBehaviour
             if (currentEggs < maxEggs)
             {
                 currentEggs++;
-                Debug.Log("달걀 획득! 현재: " + currentEggs);
-                UpdateEggSprite();   // 계란 상태 변경 → 애니메이션 갱신
-            }
-            else
-            {
-                Debug.Log("달걀 최대 보유량 도달!");
-            }
+                UpdateEggSprite();
 
-            // 필요하면 실제 달걀 오브젝트 제거
-            // Destroy(collision.gameObject);
+                // ▶ 계란 획득 사운드
+                PlaySound(eggGetSound);
+            }
         }
 
         // 2. 몬스터 충돌
         if (collision.CompareTag("Stage1_Monster"))
         {
-            if (isInvincible)
-            {
-                Debug.Log("무적 상태라 몬스터 충돌 무시");
-                return;
-            }
+            if (isInvincible) return;
 
-            Debug.Log("몬스터에게 피격!");
+            // ▶ 몬스터 피격 사운드
+            PlaySound(hitByMonsterSound);
 
             if (gameManager != null)
                 gameManager.TakeDamage();
@@ -165,43 +136,33 @@ public class PlayerInteraction : MonoBehaviour
             if (currentEggs > minEggs)
             {
                 currentEggs--;
-                Debug.Log("몬스터와 충돌! 달걀 1개 잃음. 현재: " + currentEggs);
-                UpdateEggSprite();   // 계란 수 감소 → 애니메이션 갱신
-            }
-            else
-            {
-                Debug.Log("몬스터와 충돌했지만 가지고 있는 달걀이 없습니다.");
+                UpdateEggSprite();
             }
 
             StartInvincibility();
         }
 
-        // 3. 보스 구역 진입
+        // 3. 보스 구역 진입 (❌ 효과음 제거됨)
         if (collision.CompareTag("Stage1_Boss"))
         {
             nearbyBoss = collision.GetComponent<BossController>();
-            if (nearbyBoss != null)
-                Debug.Log("보스 근처에 진입했습니다. Space 키로 달걀 전달 가능.");
         }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.CompareTag("Stage1_Boss") && nearbyBoss != null)
+        if (collision.CompareTag("Stage1_Boss"))
         {
             nearbyBoss = null;
-            Debug.Log("보스 구역에서 벗어났습니다.");
         }
     }
 
-    // ---------------- 피격 무적 + 깜빡임 ----------------
+    // ---------------- 피격 무적 ----------------
     void StartInvincibility()
     {
         isInvincible = true;
         invincibleTimer = hitInvincibleTime;
-
-        if (spriteRenderer != null)
-            StartCoroutine(HitBlink());
+        StartCoroutine(HitBlink());
     }
 
     private IEnumerator HitBlink()
@@ -210,11 +171,9 @@ public class PlayerInteraction : MonoBehaviour
         {
             spriteRenderer.color = new Color(1, 1, 1, 0.3f);
             yield return new WaitForSeconds(blinkInterval);
-
             spriteRenderer.color = new Color(1, 1, 1, 1f);
             yield return new WaitForSeconds(blinkInterval);
         }
-
         spriteRenderer.color = new Color(1, 1, 1, 1);
     }
 
@@ -223,27 +182,16 @@ public class PlayerInteraction : MonoBehaviour
     {
         bool hasEgg = currentEggs > 0;
 
-        // 🔥 Animator에 계란 보유 상태 전달 (애니메이션/스프라이트 전환은 Animator에서 처리)
         if (animator != null && !string.IsNullOrEmpty(hasEggBoolName))
-        {
             animator.SetBool(hasEggBoolName, hasEgg);
-        }
+    }
 
-        // 👉 만약 나중에 코드로도 스프라이트 바꾸고 싶으면 아래 주석 해제해서 사용하면 됨
-        /*
-        if (spriteRenderer == null)
+    // ---------------- 공통 사운드 재생 함수 ----------------
+    void PlaySound(AudioClip clip)
+    {
+        if (clip == null || audioSource == null)
             return;
 
-        if (hasEgg)
-        {
-            if (eggHoldingSprite != null)
-                spriteRenderer.sprite = eggHoldingSprite;
-        }
-        else
-        {
-            if (normalSprite != null)
-                spriteRenderer.sprite = normalSprite;
-        }
-        */
+        audioSource.PlayOneShot(clip, soundVolume);
     }
 }

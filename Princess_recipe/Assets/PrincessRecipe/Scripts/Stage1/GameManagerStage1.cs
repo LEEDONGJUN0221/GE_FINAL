@@ -23,12 +23,23 @@ public class GameManagerStage1 : MonoBehaviour
     // GameClear 여러 번 호출 방지
     private bool isGameClear = false;
 
+    // 🎵 BGM 설정
+    [Header("BGM 설정")]
+    [Tooltip("스테이지 진행 중 재생할 BGM")]
+    public AudioClip stageBGM;
+    [Tooltip("게임 클리어 시 재생할 BGM")]
+    public AudioClip gameClearBGM;
+    [Tooltip("게임 오버 시 재생할 BGM")]
+    public AudioClip gameOverBGM;
+    [Range(0f, 1f)]
+    public float bgmVolume = 0.5f;
+
+    private AudioSource bgmSource;   // BGM 전용 AudioSource
+
 
     void Awake()
     {
-        // ... 기존 코드 ...
         hudManager = FindAnyObjectByType<HUDManagerStage1>(); 
-        //FindObjectOfType 2024ver 이후로 Deprecated 되어 warning 떠서 수정했습니다.
         if (hudManager == null)
         {
             Debug.LogError("HUDManagerStage1을 씬에서 찾을 수 없습니다! HUDManager 스크립트를 HUD 오브젝트에 부착하고 확인해주세요.");
@@ -37,24 +48,40 @@ public class GameManagerStage1 : MonoBehaviour
 
     void Start()
     {
+        // 🔊 BGM AudioSource 세팅
+        bgmSource = GetComponent<AudioSource>();
+        if (bgmSource == null)
+        {
+            bgmSource = gameObject.AddComponent<AudioSource>();
+        }
+        bgmSource.playOnAwake = false;
+        bgmSource.loop = true;
+        bgmSource.volume = bgmVolume;
+
+        // 스테이지 기본 BGM 재생
+        if (stageBGM != null)
+        {
+            PlayBGM(stageBGM, true);
+        }
+
         // 초기 UI 상태 및 게임 시간 설정
         gameClearPanel.SetActive(false); 
         gameOverPanel.SetActive(false); 
         Time.timeScale = 1f; 
         
-        // 🌟 수정: 초기 점수 및 체력 설정
+        // 초기 점수 및 체력 설정
         currentScore = 0;
-        currentHealth = maxHealth; // 시작 시 최대 체력으로 설정
+        currentHealth = maxHealth;
         
         if (hudManager != null)
         {
             hudManager.UpdateScore(currentScore);
-            hudManager.UpdateHealth(currentHealth); // 🌟 HUD에 초기 체력 전달
+            hudManager.UpdateHealth(currentHealth);
             hudManager.SetGameActive(true); 
         }
     }
     
-    // ... AddScore 메서드 (변동 없음) ...
+    // 점수 추가
     public void AddScore(int amount)
     {
         currentScore += amount;
@@ -68,56 +95,69 @@ public class GameManagerStage1 : MonoBehaviour
     // ---------------------------
     // 💀 체력 감소 메서드
     // ---------------------------
-    
-    /// <summary>
-    /// 플레이어의 체력을 감소시키고 게임 오버를 확인합니다.
-    /// </summary>
     public void TakeDamage()
     {
-        currentHealth = Mathf.Max(0, currentHealth -1); // currentHealth 0 아래로 내려가는것 방지
+        currentHealth = Mathf.Max(0, currentHealth - 1);
         
         if (hudManager != null)
         {
-            hudManager.UpdateHealth(currentHealth); // HUD 업데이트
+            hudManager.UpdateHealth(currentHealth);
         }
         
         if (currentHealth <= 0)
         {
-            // 🌟 체력이 0 이하면 게임 오버 처리
             GameOver();
         }
     }
 
     // ---------------------------
-    // 🏆 성공/실패 처리 메서드 (수정됨)
+    // 🏆 성공 처리 메서드
     // ---------------------------
-
     public void GameClear()
     {
-        // 🌟 게임 클리어 시 바로 패널을 띄우는 대신 코루틴을 시작합니다.
-        // 게임 속도는 멈추지 않고, 10초 후에 패널이 뜹니다.
-        if(isGameClear) return; // GameClear 여러 번 호출 방지
+        if (isGameClear) return; // 중복 호출 방지
         isGameClear = true;        
-        StartCoroutine(GameClearCoroutine(10f)); // 10초 딜레이
+        StartCoroutine(GameClearCoroutine(10f)); // 10초 딜레이 후 클리어 처리
     }
     
-    /// <summary>
-    /// 지정된 시간만큼 대기 후 게임 클리어 패널을 활성화하고 시간을 멈춥니다.
-    /// </summary>
     private IEnumerator GameClearCoroutine(float delay)
     {
-        // 1. HUD만 비활성화하여 게임 플레이 정보(점수/체력)만 숨깁니다.
+        // HUD 비활성화
         if (hudManager != null) hudManager.SetGameActive(false);
 
-        // 2. 지정된 시간(10초)만큼 대기합니다.
+        // 10초 동안은 기존 스테이지 BGM 그대로 유지
         yield return new WaitForSeconds(delay);
         
-        // 3. 딜레이 후, 게임 클리어 패널을 활성화하고 게임 시간을 멈춥니다.
+        // 클리어 BGM으로 교체 (있을 경우)
+        if (gameClearBGM != null)
+        {
+            PlayBGM(gameClearBGM, false); // 보통 클리어는 한 번만 재생
+        }
+
+        // 클리어 패널 활성화 + 시간 정지
         gameClearPanel.SetActive(true); 
         Time.timeScale = 0f;
     }
 
+    // ---------------------------
+    // ❌ 게임 오버 처리
+    // ---------------------------
+    public void GameOver()
+    {
+        // 게임 오버 BGM으로 교체
+        if (gameOverBGM != null)
+        {
+            PlayBGM(gameOverBGM, false); // 루프 X
+        }
 
+        gameOverPanel.SetActive(true); 
+        Time.timeScale = 0f; 
+        if (hudManager != null) hudManager.SetGameActive(false); 
+    }
+
+    // ---------------------------
+    // 씬 전환 & 재시작
+    // ---------------------------
     public void LoadNextStage()
     {
         Time.timeScale = 1f; 
@@ -133,18 +173,26 @@ public class GameManagerStage1 : MonoBehaviour
             Application.Quit();
         #endif
     }
-
-    public void GameOver()
-    {
-        gameOverPanel.SetActive(true); 
-        Time.timeScale = 0f; 
-        if (hudManager != null) hudManager.SetGameActive(false); 
-    }
     
     public void RestartGame()
     {
         Time.timeScale = 1f; 
         string currentSceneName = SceneManager.GetActiveScene().name;
         SceneManager.LoadScene(currentSceneName);
+    }
+
+    // ---------------------------
+    // 🎵 공통 BGM 재생 함수
+    // ---------------------------
+    private void PlayBGM(AudioClip clip, bool loop)
+    {
+        if (bgmSource == null || clip == null)
+            return;
+
+        bgmSource.Stop();
+        bgmSource.clip = clip;
+        bgmSource.loop = loop;
+        bgmSource.volume = bgmVolume;
+        bgmSource.Play();
     }
 }
