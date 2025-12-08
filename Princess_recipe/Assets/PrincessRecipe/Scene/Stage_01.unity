@@ -566,7 +566,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {x: 4.5, y: 0.5}
   point2: {x: -5.5, y: 0.5}
-  moveSpeed: 3
+  moveSpeed: 2.5
 --- !u!212 &149283060
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -883,7 +883,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {x: 4.5, y: 0.5}
   point2: {x: -5.5, y: 0.5}
-  moveSpeed: 3
+  moveSpeed: 2
 --- !u!212 &273227645
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -1364,8 +1364,8 @@ Transform:
   m_GameObject: {fileID: 515651359}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.02, y: 22.86, z: 0}
-  m_LocalScale: {x: 4, y: 3, z: 1}
+  m_LocalPosition: {x: -3.6523, y: 22.86, z: 0}
+  m_LocalScale: {x: 3.1068, y: 3, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 717953932}
@@ -2244,7 +2244,7 @@ Transform:
   m_GameObject: {fileID: 961739749}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.50000006, y: 1.4000025, z: -10}
+  m_LocalPosition: {x: -0.50000066, y: 1.4000025, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2311,7 +2311,7 @@ Transform:
   m_GameObject: {fileID: 1046667452}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 12.98, z: 0}
+  m_LocalPosition: {x: 0.65, y: 13.76, z: 0}
   m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2390,7 +2390,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {x: 4.5, y: 0.5}
   point2: {x: -5.5, y: 0.5}
-  moveSpeed: 3
+  moveSpeed: 3.2
 --- !u!212 &1046667457
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2767,8 +2767,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.020979762, y: 0}
-  m_Size: {x: 0.8181751, y: 1}
+  m_Offset: {x: 0.020979762, y: -0.036477923}
+  m_Size: {x: 0.8181751, y: 0.8181751}
   m_Direction: 0
 --- !u!50 &1254682385
 Rigidbody2D:
@@ -2877,7 +2877,10 @@ MonoBehaviour:
   dustPrefab: {fileID: 996057403325643479, guid: 895410df2ce6f6440bcf52f76e7a69c8,
     type: 3}
   dustLifetime: 0.4
-  dustOffsetY: -0.1
+  dustOffsetLeft: {x: -0.1, y: -0.1}
+  dustOffsetRight: {x: 0.1, y: -0.1}
+  dustOffsetUp: {x: 0, y: -0.05}
+  dustOffsetDown: {x: 0, y: -0.15}
   moveSound: {fileID: 8300000, guid: df6802ed7fc05ed4bb0d7a367989a32e, type: 3}
 --- !u!114 &1254682388
 MonoBehaviour:
@@ -3401,7 +3404,7 @@ Transform:
   m_GameObject: {fileID: 1548065856}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.82, y: 19.68, z: 0}
+  m_LocalPosition: {x: -4.83, y: 19.77, z: 0}
   m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3819,7 +3822,7 @@ Transform:
   m_GameObject: {fileID: 1707695783}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.79, y: 10.99, z: 0}
+  m_LocalPosition: {x: -3.85, y: 11.84, z: 0}
   m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3898,7 +3901,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {x: 4.5, y: 0.5}
   point2: {x: -5.5, y: 0.5}
-  moveSpeed: 3
+  moveSpeed: 2.5
 --- !u!212 &1707695788
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -4166,7 +4169,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   point1: {x: 4.5, y: 0.5}
   point2: {x: -5.5, y: 0.5}
-  moveSpeed: 3
+  moveSpeed: 2
 --- !u!212 &1848960091
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -8207,10 +8210,30 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1073775733}
+    - target: {fileID: 2488884452143385633, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -616
+      objectReference: {fileID: 0}
+    - target: {fileID: 2488884452143385633, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -88
+      objectReference: {fileID: 0}
     - target: {fileID: 2734229325073307577, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 3661033487247942413, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -603
+      objectReference: {fileID: 0}
+    - target: {fileID: 3661033487247942413, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 249
       objectReference: {fileID: 0}
     - target: {fileID: 4713692583211097509, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
@@ -8322,6 +8345,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1073775733}
+    - target: {fileID: 6920350976097008810, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -607
+      objectReference: {fileID: 0}
+    - target: {fileID: 6920350976097008810, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -263
+      objectReference: {fileID: 0}
     - target: {fileID: 7987409224553242598, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -8332,6 +8365,16 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1073775733}
+    - target: {fileID: 8872934874914358193, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -601
+      objectReference: {fileID: 0}
+    - target: {fileID: 8872934874914358193, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 77
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
