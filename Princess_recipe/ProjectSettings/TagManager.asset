@@ -8,6 +8,7 @@ TagManager:
   - Stage1_Egg
   - Stage1_Boss
   - Stage2_Obstacle
+  - Stage3_Player
   layers:
   - Default
   - TransparentFX
@@ -17,8 +18,8 @@ TagManager:
   - UI
   - Stage1_Obstacle
   - 
-  - 
-  - 
+  - Stage3_Obstacle
+  - VineDamage
   - 
   - 
   - 
