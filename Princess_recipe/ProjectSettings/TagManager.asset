@@ -9,6 +9,7 @@ TagManager:
   - Stage1_Boss
   - Stage2_Obstacle
   - Stage3_Player
+  - Stage0_Map
   layers:
   - Default
   - TransparentFX

@@ -85,7 +85,7 @@ public class HUDManagerStage1 : MonoBehaviour
         int minutes = Mathf.FloorToInt(timeToDisplay / 60f);
         int seconds = Mathf.FloorToInt(timeToDisplay % 60f);
 
-        timeText.text = $"Time: {minutes:00}:{seconds:00}";
+        timeText.text = $"{minutes:00}:{seconds:00}";
     }
 
     public void SetGameActive(bool active)
