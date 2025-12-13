@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-
+using UnityEngine.SceneManagement;
 public class GameManagerStage2 : MonoBehaviour
 {
     public static GameManagerStage2 Instance;
@@ -25,6 +25,8 @@ public class GameManagerStage2 : MonoBehaviour
     public int chocolateGoal = 30;
     public int chocolateCount = 0;
     public TextMeshProUGUI chocolateText;
+
+
 
     private WarningManagerStage2 warningManager;
 
@@ -145,5 +147,33 @@ public class GameManagerStage2 : MonoBehaviour
 
         if (gameClearPanel != null)
             gameClearPanel.SetActive(true);
+    }
+
+// ================== 공통 ==================
+    public void OnClickRestart()
+    {
+        Debug.Log("[UI] Restart 버튼 클릭");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void OnClickQuit()
+    {
+        Debug.Log("[UI] Quit 버튼 클릭");
+
+        // 일단은 게임 종료
+        Application.Quit();
+
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+    #endif
+    }
+
+    // ================== GameClear 전용 ==================
+    public void OnClickNext()
+    {
+        Debug.Log("[UI] Next 클릭 - 맵 선택으로 이동");
+
+        // 🔹 나중에 맵 선택 씬 이름으로 교체
+        SceneManager.LoadScene("MapSelect");
     }
 }

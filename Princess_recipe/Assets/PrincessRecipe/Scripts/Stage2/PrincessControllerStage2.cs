@@ -1,12 +1,14 @@
 using UnityEngine;
 using System.Collections;
 
+
 // Grid 기반 셀 단위 이동 + 무적/깜빡임 + 벽 감지
 public class PrincessControllerStage2 : MonoBehaviour
 {
     [Header("그리드 설정")]
     [Tooltip("플레이어가 움직일 Grid (Tilemap의 부모)")]
     public Grid grid;
+
     [Tooltip("한 칸 이동에 걸리는 시간(초)")]
     public float moveTime = 0.15f;
 
@@ -14,17 +16,17 @@ public class PrincessControllerStage2 : MonoBehaviour
     public Vector2Int minBounds = new Vector2Int(-10, -10);
     public Vector2Int maxBounds = new Vector2Int(10, 10);
 
-    [Header("벽 / 장애물 설정")]
-    [Tooltip("벽/블럭이 속한 레이어 (Stage2_Obstacle 등)")]
-    public LayerMask obstacleLayer;
-    [Tooltip("목적 셀 중심에서 이 반경 안에 장애물이 있으면 막힌 것으로 판단")]
-    public float collisionRadius = 0.1f;
-
     [Header("무적 / 깜빡임 설정")]
+    [Tooltip("피격 후 무적 시간(초)")]
     public float invincibleDuration = 3f;
+
+    [Tooltip("무적 중 깜빡임 간격(초)")]
     public float blinkInterval = 0.1f;
-    [Tooltip("벽/블럭에 붙어 있는 태그 이름")]
+
+    [Tooltip("위험 블럭 태그 이름")]
     public string obstacleTag = "Stage2_Obstacle";
+
+
 
     private bool isMoving = false;
     private bool isInvincible = false;
@@ -33,6 +35,14 @@ public class PrincessControllerStage2 : MonoBehaviour
     private Vector3Int currentCell;
     private SpriteRenderer spriteRenderer;
     private Rigidbody2D rb;
+
+    private WarningManagerStage2 warningManager;
+
+    public Vector3Int CurrentCell => currentCell;
+
+
+
+
 
     void Start()
     {
@@ -71,81 +81,97 @@ public class PrincessControllerStage2 : MonoBehaviour
         }
 
         Debug.Log("[PrincessControllerStage2] 시작 셀: " + currentCell);
+
+        warningManager = FindAnyObjectByType<WarningManagerStage2>();
+        if (warningManager == null)
+        {
+            Debug.LogError("[PrincessControllerStage2] WarningManagerStage2를 찾지 못했습니다!");
+        }
+
+
     }
 
     void Update()
     {
         if (grid == null) return;
+
+        // =================================================
+        // 1. 위험 블럭 위에 서 있는지 체크 (이동 여부 무관)
+        // =================================================
+        if (!isInvincible && warningManager != null)
+        {
+            if (warningManager.IsDangerCell(transform.position))
+            {
+                TakeBlockDamage();
+            }
+        }
+
+        // =================================================
+        // 2. 이동 중이면 입력 무시
+        // =================================================
         if (isMoving) return;
 
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-
-        // 대각선 입력 방지
-        if (h != 0 && v != 0)
-            return;
-
+        // =================================================
+        // 3. 입력 받기 (GetKeyDown → 꾹 눌러도 1회 이동)
+        // =================================================
         Vector3Int nextCell = currentCell;
         Vector2 dir = Vector2.zero;
 
-        if (h > 0.1f)
+        if (Input.GetKeyDown(KeyCode.D))
         {
             nextCell += Vector3Int.right;
             dir = Vector2.right;
         }
-        else if (h < -0.1f)
+        else if (Input.GetKeyDown(KeyCode.A))
         {
             nextCell += Vector3Int.left;
             dir = Vector2.left;
         }
-        else if (v > 0.1f)
+        else if (Input.GetKeyDown(KeyCode.W))
         {
             nextCell += Vector3Int.up;
             dir = Vector2.up;
         }
-        else if (v < -0.1f)
+        else if (Input.GetKeyDown(KeyCode.S))
         {
             nextCell += Vector3Int.down;
             dir = Vector2.down;
         }
-
-        if (dir == Vector2.zero)
-            return;
-
-        // 좌우 방향에 따라 스프라이트 반전
-        if (spriteRenderer != null)
+        else
         {
-            if (dir.x > 0.1f) spriteRenderer.flipX = true;
-            else if (dir.x < -0.1f) spriteRenderer.flipX = false;
+            return; // 아무 키도 안 눌렸으면 종료
         }
 
-        // 경계 체크
+        // =================================================
+        // 4. 스프라이트 방향
+        // =================================================
+        if (spriteRenderer != null)
+        {
+            if (dir.x > 0) spriteRenderer.flipX = true;
+            else if (dir.x < 0) spriteRenderer.flipX = false;
+        }
+
+        // =================================================
+        // 5. 이동 경계 체크
+        // =================================================
         if (nextCell.x < minBounds.x || nextCell.x > maxBounds.x ||
             nextCell.y < minBounds.y || nextCell.y > maxBounds.y)
         {
-            Debug.Log("[PrincessControllerStage2] 경계 밖으로 이동 불가: " + nextCell);
             return;
         }
 
-        // 목적 셀의 월드 중앙 좌표
+        // =================================================
+        // 6. 이동 실행
+        // =================================================
         Vector3 targetPos = grid.GetCellCenterWorld(nextCell);
-
-        // 이동하기 전에 그 셀에 장애물이 있는지 레이어로 체크
-        Collider2D hit = Physics2D.OverlapCircle(targetPos, collisionRadius, obstacleLayer);
-        if (hit != null)
-        {
-            Debug.Log($"[PrincessControllerStage2] 이동 취소 – 장애물({hit.name}) 때문에 막힘, 셀 {nextCell}");
-            // 여기서 "부딪힌 느낌" 이펙트/사운드 재생해도 됨
-            return;
-        }
-
-        // 실제 이동 코루틴 시작
         StartCoroutine(MoveToCell(nextCell, targetPos));
     }
+
 
     IEnumerator MoveToCell(Vector3Int nextCell, Vector3 targetPos)
     {
         isMoving = true;
+
         Vector3 startPos = transform.position;
         float elapsed = 0f;
 
@@ -153,47 +179,20 @@ public class PrincessControllerStage2 : MonoBehaviour
         {
             elapsed += Time.deltaTime;
             float t = Mathf.Clamp01(elapsed / moveTime);
-            Vector3 newPos = Vector3.Lerp(startPos, targetPos, t);
-
-            if (rb != null)
-                rb.MovePosition(newPos);
-            else
-                transform.position = newPos;
-
+            transform.position = Vector3.Lerp(startPos, targetPos, t);
             yield return null;
         }
 
-        if (rb != null)
-            rb.MovePosition(targetPos);
-        else
-            transform.position = targetPos;
+        // 1️⃣ 셀 중앙으로 확정 스냅
+        currentCell = nextCell;
+        transform.position = grid.GetCellCenterWorld(currentCell);
 
-        currentCell = grid.WorldToCell(targetPos);
         isMoving = false;
     }
 
-    // 벽/블럭(Trigger)에 닿았을 때 – 데미지 + 무적
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!other.CompareTag(obstacleTag))
-            return;
 
-        Debug.Log("[PrincessControllerStage2] OnTriggerEnter2D: " + other.name);
 
-        if (isInvincible)
-        {
-            Debug.Log("[PrincessControllerStage2] 무적 상태라 데미지 무시");
-            return;
-        }
-
-        GameManagerStage2.Instance.TakeDamage(1);
-        Debug.Log("[PrincessControllerStage2] 데미지 1");
-
-        if (invincibleRoutine != null)
-            StopCoroutine(invincibleRoutine);
-
-        invincibleRoutine = StartCoroutine(InvincibleRoutine());
-    }
+    
 
     IEnumerator InvincibleRoutine()
     {
@@ -221,4 +220,25 @@ public class PrincessControllerStage2 : MonoBehaviour
         isInvincible = false;
         invincibleRoutine = null;
     }
+    
+
+
+
+  public void TakeBlockDamage()
+    {
+        if (isInvincible) return;
+
+        GameManagerStage2.Instance.TakeDamage(1);
+
+        if (invincibleRoutine != null)
+            StopCoroutine(invincibleRoutine);
+
+        invincibleRoutine = StartCoroutine(InvincibleRoutine());
+    }
+
+
+
+
 }
+
+
