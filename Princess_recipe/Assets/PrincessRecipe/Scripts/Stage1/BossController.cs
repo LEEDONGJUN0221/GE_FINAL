@@ -51,9 +51,9 @@ public class BossController : MonoBehaviour
     private int GetChoice(int idx)
     {
         if (RunData.I == null) return -1;
-        if (idx == 1) return RunData.I.choice1;
-        if (idx == 2) return RunData.I.choice2;
-        if (idx == 3) return RunData.I.choice3;
+        if (idx == 1) return RunData.I.choice0;
+        if (idx == 2) return RunData.I.choice1;
+        if (idx == 3) return RunData.I.choice2;
         return -1;
     }
 

@@ -4,38 +4,38 @@ using System.Collections;
 
 public class MapUI : MonoBehaviour
 {
-    [Header("UI")]
-    public GameObject mapPanel;       // (Start에서는 지도 UI, Stage에서는 클리어 패널로 써도 됨)
+    [Header("패널")]
+    public GameObject mapPanel;      // 클리어 패널/지도 패널로 사용
     public GameObject loadingPanel;
+
+    [Header("플레이어 이동 잠금(있으면 연결)")]
     public MonoBehaviour playerMove;
 
     [Header("로딩")]
-    public float loadingSeconds = 5f;
+    public float loadingSeconds = 2f;
 
-    [Header("선택 정보 (디버그/기본값)")]
-    public int choiceIndex = 1;                 // 1=Start→Stage1, 2=Stage1→Stage2, 3=Stage2→Stage3
-    public string nextSceneName = "Stage_01";   // 이동할 씬
+    [Header("이번에 저장할 선택 인덱스 (0=Start, 1=Stage1, 2=Stage2)")]
+    [Range(0,2)]
+    public int choiceIndex = 0;
+
+    [Header("선택 후 이동할 씬")]
+    public string nextSceneName = "Stage_01";
 
     private bool isLoading = false;
 
-    // -------------------------
-    // ★ 외부(지도 상호작용 / 보스 클리어)에서 호출해서 패널 열기
-    // -------------------------
+    // 외부에서 패널 오픈할 때 호출
     public void OpenChoice(int idx, string nextScene)
     {
-        choiceIndex = idx;
+        choiceIndex = Mathf.Clamp(idx, 0, 2);
         nextSceneName = nextScene;
 
         if (mapPanel != null) mapPanel.SetActive(true);
 
-        // 선택 중 멈춤
         Time.timeScale = 0f;
         if (playerMove != null) playerMove.enabled = false;
     }
 
-    // -------------------------
-    // A / B 버튼에 직접 연결
-    // -------------------------
+    // A/B 버튼에 연결
     public void ChooseA() => ChooseAndGo(0);
     public void ChooseB() => ChooseAndGo(1);
 
@@ -43,15 +43,13 @@ public class MapUI : MonoBehaviour
     {
         if (isLoading) return;
 
-        // 1) 선택 저장
         SaveChoice(choiceIndex, value);
 
-        // 2) UI 정리 + 시간 복구
+        // UI 닫기 + 시간 복구
         if (mapPanel != null) mapPanel.SetActive(false);
         Time.timeScale = 1f;
         if (playerMove != null) playerMove.enabled = true;
 
-        // 3) 로딩 후 씬 이동
         StartCoroutine(LoadStageRoutine(nextSceneName));
     }
 
@@ -63,11 +61,13 @@ public class MapUI : MonoBehaviour
             return;
         }
 
-        if (idx == 1) RunData.I.choice1 = value;
-        else if (idx == 2) RunData.I.choice2 = value;
-        else if (idx == 3) RunData.I.choice3 = value;
+        Debug.Log($"[SAVE] idx={idx}, value={value}, BEFORE c0={RunData.I.choice0}, c1={RunData.I.choice1}, c2={RunData.I.choice2}");
 
-        Debug.Log($"[CHOICE SAVED] idx={idx}, value={value}  (c1={RunData.I.choice1}, c2={RunData.I.choice2}, c3={RunData.I.choice3})");
+        if (idx == 0) RunData.I.choice0 = value;
+        else if (idx == 1) RunData.I.choice1 = value;
+        else if (idx == 2) RunData.I.choice2 = value;
+
+        Debug.Log($"[SAVE] AFTER  c0={RunData.I.choice0}, c1={RunData.I.choice1}, c2={RunData.I.choice2}");
     }
 
     private IEnumerator LoadStageRoutine(string sceneName)

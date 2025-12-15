@@ -11,7 +11,7 @@ public class GameManagerStage1 : MonoBehaviour
     [Header("다음 스테이지 선택 (MapUI가 패널/이동 담당)")]
     public MapUI mapUI;
     public string nextSceneName = "Stage2";
-    public int choiceIndex = 2;
+    public int choiceIndex = 1;
 
     private int currentScore = 0;
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using UnityEngine.SceneManagement;
+
 public class GameManagerStage2 : MonoBehaviour
 {
     public static GameManagerStage2 Instance;
@@ -9,54 +9,48 @@ public class GameManagerStage2 : MonoBehaviour
     [Header("UI Panels")]
     public GameObject startPanel;
     public GameObject gameOverPanel;
-    public GameObject gameClearPanel;
+
+    [Header("★ Clear는 MapUI가 처리")]
+    public MapUI mapUI;          // Stage2 씬에 있는 MapUI
+    public string nextSceneName = "Stage3";
+    public int choiceIndex = 2;  // Stage2 → Stage3 선택
 
     [Header("Player HP")]
     public int maxHP = 4;
-    [HideInInspector]
     public int currentHP;
 
-    [Tooltip("왼쪽 위 딸기 HP 아이콘들 (위에서 아래 순서대로)")]
-    public Image[] hpIcons;         // HP_1, HP_2, HP_3, HP_4
-    public Sprite hpFullSprite;     // 멀쩡한 딸기
-    public Sprite hpBrokenSprite;   // 깨진 딸기
+    public Image[] hpIcons;
+    public Sprite hpFullSprite;
+    public Sprite hpBrokenSprite;
 
-    [Header("Chocolate Score")]
+    [Header("Chocolate")]
     public int chocolateGoal = 30;
     public int chocolateCount = 0;
     public TextMeshProUGUI chocolateText;
 
-
-
     private WarningManagerStage2 warningManager;
 
-    // ============== 생명 주기 ==============
+    // =====================
     void Awake()
     {
         if (Instance == null) Instance = this;
-        else
-        {
-            Destroy(gameObject);
-            return;
-        }
+        else { Destroy(gameObject); return; }
 
-        // HP는 무조건 maxHP로 시작
         currentHP = maxHP;
-        Debug.Log($"[GameManagerStage2] Awake - HP 초기화: {currentHP}/{maxHP}");
+
+        if (mapUI == null)
+            mapUI = FindAnyObjectByType<MapUI>();
     }
 
     void Start()
     {
         UpdateHPUI();
         UpdateChocolateUI();
-        // StartStage();  // 시작 패널 없이 바로 시작하고 싶으면 주석 해제
     }
 
-    // ============== 스테이지 시작 ==============
+    // =====================
     public void StartStage()
     {
-        Debug.Log("Stage2 시작!");
-
         if (startPanel != null)
             startPanel.SetActive(false);
 
@@ -65,68 +59,45 @@ public class GameManagerStage2 : MonoBehaviour
 
         if (warningManager != null)
             warningManager.enabled = true;
-        else
-            Debug.LogError("WarningManagerStage2를 찾지 못했습니다.");
     }
 
-    // ============== HP / 데미지 ==============
+    // =====================
     public void TakeDamage(int amount)
     {
-        if (currentHP <= 0) return;  // 이미 죽었으면 무시
+        if (currentHP <= 0) return;
 
-        currentHP -= amount;
-        if (currentHP < 0) currentHP = 0;
-
-        Debug.Log($"[GameManagerStage2] HP 감소: {currentHP}/{maxHP}");
-
-        UpdateHPUI();  // 🔥 데미지 들어올 때마다 아이콘 즉시 갱신
+        currentHP = Mathf.Max(0, currentHP - amount);
+        UpdateHPUI();
 
         if (currentHP <= 0)
-        {
             OnPlayerDeath();
-        }
     }
 
     void UpdateHPUI()
     {
-        if (hpIcons == null || hpIcons.Length == 0)
-        {
-            Debug.LogWarning("[GameManagerStage2] hpIcons가 비어있음");
-            return;
-        }
-
-        int hp = Mathf.Clamp(currentHP, 0, hpIcons.Length);
-
         for (int i = 0; i < hpIcons.Length; i++)
         {
             if (hpIcons[i] == null) continue;
-
-            hpIcons[i].sprite = (i < hp) ? hpFullSprite : hpBrokenSprite;
+            hpIcons[i].sprite = (i < currentHP) ? hpFullSprite : hpBrokenSprite;
         }
-
-        Debug.Log($"[GameManagerStage2] HP UI 갱신 - HP: {hp}");
     }
 
     void OnPlayerDeath()
     {
-        Debug.Log("[GameManagerStage2] 플레이어 사망");
-
         if (warningManager != null)
             warningManager.enabled = false;
 
         if (gameOverPanel != null)
             gameOverPanel.SetActive(true);
+
+        Time.timeScale = 0f;
     }
 
-    // ============== 초콜릿 ==============
+    // =====================
     public void AddChocolate(int amount)
     {
-        chocolateCount += amount;
-        if (chocolateCount > chocolateGoal)
-            chocolateCount = chocolateGoal;
-
+        chocolateCount = Mathf.Min(chocolateGoal, chocolateCount + amount);
         UpdateChocolateUI();
-        Debug.Log($"[GameManagerStage2] 초콜릿: {chocolateCount}/{chocolateGoal}");
 
         if (chocolateCount >= chocolateGoal)
             OnStageClear();
@@ -138,42 +109,23 @@ public class GameManagerStage2 : MonoBehaviour
             chocolateText.text = $"{chocolateCount} / {chocolateGoal}";
     }
 
+    // =====================
     void OnStageClear()
     {
-        Debug.Log("[GameManagerStage2] Stage2 클리어!");
+        Debug.Log("[Stage2] CLEAR");
 
         if (warningManager != null)
             warningManager.enabled = false;
 
-        if (gameClearPanel != null)
-            gameClearPanel.SetActive(true);
-    }
-
-// ================== 공통 ==================
-    public void OnClickRestart()
-    {
-        Debug.Log("[UI] Restart 버튼 클릭");
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void OnClickQuit()
-    {
-        Debug.Log("[UI] Quit 버튼 클릭");
-
-        // 일단은 게임 종료
-        Application.Quit();
-
-    #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-    #endif
-    }
-
-    // ================== GameClear 전용 ==================
-    public void OnClickNext()
-    {
-        Debug.Log("[UI] Next 클릭 - 맵 선택으로 이동");
-
-        // 🔹 나중에 맵 선택 씬 이름으로 교체
-        SceneManager.LoadScene("MapSelect");
+        // ⭐ 핵심: 여기서 씬 이동 안 함
+        if (mapUI != null)
+        {
+            mapUI.OpenChoice(choiceIndex, nextSceneName);
+        }
+        else
+        {
+            Debug.LogError("MapUI 없음!");
+            Time.timeScale = 0f;
+        }
     }
 }

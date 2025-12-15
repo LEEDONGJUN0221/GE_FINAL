@@ -4,15 +4,13 @@ public class RunData : MonoBehaviour
 {
     public static RunData I { get; private set; }
 
-    public int choice1 = -1;
-    public int choice2 = -1;
-    public int choice3 = -1;
+    public int choice0 = -1; // Start 선택
+    public int choice1 = -1; // Stage1 선택
+    public int choice2 = -1; // Stage2 선택
 
     private void Awake()
     {
-        // 🔴 에디터 상태에서 DontDestroyOnLoad 절대 호출 금지
-        if (!Application.isPlaying)
-            return;
+        if (!Application.isPlaying) return;
 
         if (I != null && I != this)
         {
@@ -26,9 +24,9 @@ public class RunData : MonoBehaviour
 
     public int EndingId()
     {
+        int c0 = Mathf.Max(0, choice0);
         int c1 = Mathf.Max(0, choice1);
         int c2 = Mathf.Max(0, choice2);
-        int c3 = Mathf.Max(0, choice3);
-        return c1 + c2 * 2 + c3 * 4;
+        return c0 + c1 * 2 + c2 * 4; // 0~7
     }
 }
