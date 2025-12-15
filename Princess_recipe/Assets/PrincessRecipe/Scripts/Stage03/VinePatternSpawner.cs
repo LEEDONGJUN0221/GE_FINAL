@@ -17,12 +17,12 @@ public class VinePatternSpawner : MonoBehaviour
     public GameObject vinePrefab;
 
     [Header("Timing")]
-    public float telegraphStart = 0.9f;
-    public float telegraphMin = 0.55f;
+    public float telegraphStart = 1.20f;
+    public float telegraphMin = 0.95f;
     [HideInInspector] public float telegraphTime = 0.7f;
 
-    public float activeTimeBase = 1.0f;
-    [HideInInspector] public float activeTime = 0.65f;
+    public float activeTimeBase = 0.40f;
+    [HideInInspector] public float activeTime = 0.45f;
 
     [Header("Safety")]
     public bool avoidPlayerCell = false;          // 플레이어가 서있는 셀은 스폰 제외

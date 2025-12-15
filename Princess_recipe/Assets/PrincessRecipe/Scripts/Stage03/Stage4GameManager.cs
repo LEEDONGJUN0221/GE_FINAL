@@ -37,9 +37,9 @@ public class Stage4GameManager : MonoBehaviour
     private float playTime = 0f;
 
     [Header("Phase Speed (Fruit Count Based)")]
-    public float phase1BeatInterval = 1.4f;
-    public float phase2BeatInterval = 1.35f;
-    public float phase3BeatInterval = 1.20f;
+    public float phase1BeatInterval = 2.20f;
+    public float phase2BeatInterval = 1.90f;
+    public float phase3BeatInterval = 1.50f;
 
     // 같은 나무 연속 수확 금지
     private int lastCollectedTreeId = -1;
