@@ -15,7 +15,7 @@ public class BossController : MonoBehaviour
     [Header("Defeat Trigger")]
     public string defeatTriggerName = "Defeat";
 
-    public int requiredEggs = 5;
+    public int requiredEggs = 3;
     private int receivedEggs = 0;
     private bool isDefeated = false;
 
@@ -84,10 +84,15 @@ public class BossController : MonoBehaviour
 
     void StopAllMonsters()
     {
-        MonsterPatrol[] monsters = FindObjectsByType<MonsterPatrol>(FindObjectsSortMode.None);
-        foreach (var m in monsters)
-            m.StopMonster();
+        MonsterPatrol[] monsters =
+            FindObjectsByType<MonsterPatrol>(FindObjectsSortMode.None);
+
+        foreach (MonsterPatrol monster in monsters)
+        {
+            monster.Die();   // ★ 핵심
+        }
     }
+
 
     void DefeatBoss()
     {

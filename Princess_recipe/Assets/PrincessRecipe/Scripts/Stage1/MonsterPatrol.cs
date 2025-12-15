@@ -9,23 +9,32 @@ public class MonsterPatrol : MonoBehaviour
     [Header("이동 설정")]
     public float moveSpeed = 5f;
 
+    [Header("사망 스프라이트")]
+    public Sprite deadSprite;
+
     private Vector2 currentTarget;
     private SpriteRenderer spriteRenderer;
+    private Animator animator;          // ✅ 추가
+    private Animation legacyAnim;       // ✅ 혹시 레거시면 이것도
+    private bool isDead = false;
+
+    void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = GetComponent<Animator>();
+        legacyAnim = GetComponent<Animation>();
+    }
 
     void Start()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-
-        // 현재 Y좌표 고정
         float y = transform.position.y;
         point1 = new Vector2(point1.x, y);
         point2 = new Vector2(point2.x, y);
 
-        // 시작 시 가까운 지점 선택
-        if (Vector2.Distance(transform.position, point1) < Vector2.Distance(transform.position, point2))
-            currentTarget = point2;
-        else
-            currentTarget = point1;
+        currentTarget =
+            Vector2.Distance(transform.position, point1) <
+            Vector2.Distance(transform.position, point2)
+                ? point2 : point1;
 
         Rigidbody2D rb = GetComponent<Rigidbody2D>();
         if (rb != null) rb.bodyType = RigidbodyType2D.Kinematic;
@@ -33,44 +42,54 @@ public class MonsterPatrol : MonoBehaviour
 
     void Update()
     {
-        // 목표 y좌표 고정
+        if (isDead) return;
+
         float y = transform.position.y;
         Vector2 target = new Vector2(currentTarget.x, y);
 
-        // 이동
         transform.position = Vector2.MoveTowards(
             transform.position,
             target,
             moveSpeed * Time.deltaTime
         );
 
-        // 도달 체크
         if (Vector2.Distance(transform.position, target) < 0.1f)
-        {
             currentTarget = (currentTarget.x == point1.x) ? point2 : point1;
-        }
 
         UpdateSpriteDirection();
     }
 
     void UpdateSpriteDirection()
     {
-        if (spriteRenderer == null) return;
+        if (spriteRenderer == null || isDead) return;
 
         float dirX = currentTarget.x - transform.position.x;
-        if (dirX > 0.01f) spriteRenderer.flipX = false;
-        else if (dirX < -0.01f) spriteRenderer.flipX = true;
+        spriteRenderer.flipX = dirX < 0;
     }
 
-    public void IncreaseSpeed(float speedIncreaseAmount)
+    public void IncreaseSpeed(float amount)
     {
-        moveSpeed += speedIncreaseAmount;
-        Debug.Log($"{gameObject.name}의 속도 증가! 현재 속도: {moveSpeed}");
+        if (isDead) return;
+        moveSpeed += amount;
     }
 
-    public void StopMonster()
+    public void Die()
     {
+        if (isDead) return;
+        isDead = true;
+
+        // ✅ 애니메이션이 스프라이트 덮어쓰는 걸 먼저 차단
+        if (animator != null) animator.enabled = false;
+        if (legacyAnim != null) legacyAnim.enabled = false;
+
         moveSpeed = 0f;
-        Debug.Log($"{gameObject.name} 몬스터가 멈췄습니다.");
+
+        if (spriteRenderer != null)
+        {
+            if (deadSprite != null) spriteRenderer.sprite = deadSprite;
+        }
+
+        Collider2D col = GetComponent<Collider2D>();
+        if (col != null) col.enabled = false;
     }
 }
