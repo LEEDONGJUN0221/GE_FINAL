@@ -82,6 +82,10 @@ public class VineDamageZone : MonoBehaviour
         }
 
         hasDamaged = true; // 패턴당 1회
+        PlayerHitFlash flash = other.GetComponent<PlayerHitFlash>();
+        if (flash != null) flash.Flash();
+
+
     }
 
 #if UNITY_EDITOR

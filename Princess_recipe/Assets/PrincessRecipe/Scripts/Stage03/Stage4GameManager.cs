@@ -36,6 +36,11 @@ public class Stage4GameManager : MonoBehaviour
     private bool isGameClear = false;
     private float playTime = 0f;
 
+    [Header("Phase Speed (Fruit Count Based)")]
+    public float phase1BeatInterval = 1.4f;
+    public float phase2BeatInterval = 1.35f;
+    public float phase3BeatInterval = 1.20f;
+
     // 같은 나무 연속 수확 금지
     private int lastCollectedTreeId = -1;
 
@@ -71,24 +76,55 @@ public class Stage4GameManager : MonoBehaviour
         UpdateUI();
     }
 
+    private int GetPhaseByFruit()
+    {
+        // 0-5개: 페이즈1, 5-12: 페이즈2, 12-16: 페이즈3
+        // 경계 포함 처리를 명확히 하기 위해 다음처럼 정리:
+        // 0~4 = 1, 5~11 = 2, 12~ = 3
+        if (currentFruitCount >= 12) return 3;
+        if (currentFruitCount >= 5) return 2;
+        return 1;
+    }
+
+    private float GetBeatIntervalByPhase(int phase)
+    {
+        switch (phase)
+        {
+            case 1: return phase1BeatInterval;
+            case 2: return phase2BeatInterval;
+            default: return phase3BeatInterval;
+        }
+    }
+
     private IEnumerator CoPatternLoop()
     {
         yield return new WaitForSeconds(1.0f);
 
         while (!isGameOver && !isGameClear)
         {
-            // 난이도: 과일 진행도 기준으로 경고시간 줄이기(원하면 HP 기준으로 바꿔도 됨)
-            float progress = (targetFruitCount <= 0) ? 0f : Mathf.Clamp01((float)currentFruitCount / targetFruitCount);
+            // 1) 과일 진행도 기준 경고시간 계산 (기존 유지)
+            float progress = (targetFruitCount <= 0)
+                ? 0f
+                : Mathf.Clamp01((float)currentFruitCount / targetFruitCount);
 
-            // 스포너 쪽 타이밍을 “여기서” 갱신
-            vineSpawner.telegraphTime = Mathf.Lerp(vineSpawner.telegraphStart, vineSpawner.telegraphMin, progress);
-            vineSpawner.activeTime = vineSpawner.activeTimeBase; // 고정(원하면 progress로 조절 가능)
+            vineSpawner.telegraphTime =
+                Mathf.Lerp(vineSpawner.telegraphStart, vineSpawner.telegraphMin, progress);
 
+            vineSpawner.activeTime = vineSpawner.activeTimeBase;
+
+            // 2) 패턴 발동
             vineSpawner.TriggerRandomPattern();
 
-            yield return new WaitForSeconds(beatInterval);
+            // 3) 페이즈별 속도 계산
+            int phase = GetPhaseByFruit();
+            float interval = GetBeatIntervalByPhase(phase);
+
+            yield return new WaitForSeconds(interval);
         }
     }
+
+
+    
 
     // ---------------- Damage ----------------
     public void TakeDamage(int damage)

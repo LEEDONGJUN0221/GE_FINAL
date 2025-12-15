@@ -651,6 +651,7 @@ GameObject:
   - component: {fileID: 561575788}
   - component: {fileID: 561575787}
   - component: {fileID: 561575785}
+  - component: {fileID: 561575793}
   - component: {fileID: 561575786}
   - component: {fileID: 561575792}
   - component: {fileID: 561575791}
@@ -819,7 +820,7 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: -1432392535
-  m_SortingLayer: 3
+  m_SortingLayer: 4
   m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 81cc5eed06e81b744a3ccfa6a2a71fea, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -877,6 +878,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactKey: 32
   showDebugLog: 0
+--- !u!114 &561575793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 561575784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fde765344a62184287a5a1f2676a479, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flashDuration: 0.25
+  blinkInterval: 0.05
+  flashColor: {r: 1, g: 0.2, b: 0.2, a: 1}
+  targets: []
 --- !u!1 &594085318
 GameObject:
   m_ObjectHideFlags: 0
@@ -2086,6 +2103,9 @@ MonoBehaviour:
   resultPanel: {fileID: 538606238}
   resultText: {fileID: 1278306685}
   restartSceneName: 
+  phase1BeatInterval: 1.2
+  phase2BeatInterval: 0.9
+  phase3BeatInterval: 0.65
 --- !u!4 &1320641150
 Transform:
   m_ObjectHideFlags: 0
