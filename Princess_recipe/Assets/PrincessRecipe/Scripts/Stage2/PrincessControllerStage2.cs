@@ -18,7 +18,7 @@ public class PrincessControllerStage2 : MonoBehaviour
 
     [Header("무적 / 깜빡임 설정")]
     [Tooltip("피격 후 무적 시간(초)")]
-    public float invincibleDuration = 3f;
+    public float invincibleDuration = 2f;
 
     [Tooltip("무적 중 깜빡임 간격(초)")]
     public float blinkInterval = 0.1f;
@@ -26,6 +26,7 @@ public class PrincessControllerStage2 : MonoBehaviour
     [Tooltip("위험 블럭 태그 이름")]
     public string obstacleTag = "Stage2_Obstacle";
 
+   
 
 
     private bool isMoving = false;
@@ -40,9 +41,10 @@ public class PrincessControllerStage2 : MonoBehaviour
 
     public Vector3Int CurrentCell => currentCell;
 
-
-
-
+    // ===== 이동 입력 버퍼 (이동 중에 눌러도 1개 저장) =====
+    private bool hasBufferedInput = false;
+    private Vector3Int bufferedDelta = Vector3Int.zero;   // 다음 이동 예약(셀 기준)
+    private Vector2 bufferedDir = Vector2.zero;           // 스프라이트 방향용
 
     void Start()
     {
@@ -107,34 +109,30 @@ public class PrincessControllerStage2 : MonoBehaviour
         }
 
         // =================================================
-        // 2. 이동 중이면 입력 무시
+        // 2. 입력 받기 (GetKeyDown → 꾹 눌러도 1회 이동)
+        //    이동 중이어도 입력은 "버퍼"에 저장한다
         // =================================================
-        if (isMoving) return;
-
-        // =================================================
-        // 3. 입력 받기 (GetKeyDown → 꾹 눌러도 1회 이동)
-        // =================================================
-        Vector3Int nextCell = currentCell;
+        Vector3Int delta = Vector3Int.zero;
         Vector2 dir = Vector2.zero;
 
         if (Input.GetKeyDown(KeyCode.D))
         {
-            nextCell += Vector3Int.right;
+            delta = Vector3Int.right;
             dir = Vector2.right;
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            nextCell += Vector3Int.left;
+            delta = Vector3Int.left;
             dir = Vector2.left;
         }
         else if (Input.GetKeyDown(KeyCode.W))
         {
-            nextCell += Vector3Int.up;
+            delta = Vector3Int.up;
             dir = Vector2.up;
         }
         else if (Input.GetKeyDown(KeyCode.S))
         {
-            nextCell += Vector3Int.down;
+            delta = Vector3Int.down;
             dir = Vector2.down;
         }
         else
@@ -143,30 +141,45 @@ public class PrincessControllerStage2 : MonoBehaviour
         }
 
         // =================================================
-        // 4. 스프라이트 방향
+        // 3. 이동 중이면 → 버퍼에 저장하고 끝
         // =================================================
+        if (isMoving)
+        {
+            bufferedDelta = delta;
+            bufferedDir = dir;
+            hasBufferedInput = true;
+            return;
+        }
+
+        // =================================================
+        // 4. 이동 시도
+        // =================================================
+        TryMove(delta, dir);
+    }
+
+
+    void TryMove(Vector3Int delta, Vector2 dir)
+    {
+        Vector3Int nextCell = currentCell + delta;
+
+        // 4. 스프라이트 방향
         if (spriteRenderer != null)
         {
             if (dir.x > 0) spriteRenderer.flipX = true;
             else if (dir.x < 0) spriteRenderer.flipX = false;
         }
 
-        // =================================================
         // 5. 이동 경계 체크
-        // =================================================
         if (nextCell.x < minBounds.x || nextCell.x > maxBounds.x ||
             nextCell.y < minBounds.y || nextCell.y > maxBounds.y)
         {
             return;
         }
 
-        // =================================================
         // 6. 이동 실행
-        // =================================================
         Vector3 targetPos = grid.GetCellCenterWorld(nextCell);
         StartCoroutine(MoveToCell(nextCell, targetPos));
     }
-
 
     IEnumerator MoveToCell(Vector3Int nextCell, Vector3 targetPos)
     {
@@ -188,6 +201,20 @@ public class PrincessControllerStage2 : MonoBehaviour
         transform.position = grid.GetCellCenterWorld(currentCell);
 
         isMoving = false;
+        // ===== 이동이 끝난 직후 버퍼 입력이 있으면 바로 1회 추가 이동 =====
+        if (hasBufferedInput)
+        {
+            hasBufferedInput = false;
+            Vector3Int d = bufferedDelta;
+            Vector2 bd = bufferedDir;
+
+            bufferedDelta = Vector3Int.zero;
+            bufferedDir = Vector2.zero;
+
+            // 다음 이동 바로 실행
+            TryMove(d, bd);
+        }
+
     }
 
 

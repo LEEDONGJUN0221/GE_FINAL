@@ -19,6 +19,9 @@ public class WarningManagerStage2 : MonoBehaviour
     public int boardWidth = 10;
     public int boardHeight = 10;
 
+    [Header("블럭 크기 제한")]
+    public int maxBlockWidth = 9;
+    public int maxBlockHeight = 9;
     [Header("시간 설정")]
     public float intervalMin = 1.2f;
     public float intervalMax = 2.5f;
@@ -38,6 +41,9 @@ public class WarningManagerStage2 : MonoBehaviour
 
     private List<Vector3Int[]> shapes = new List<Vector3Int[]>();
     private bool isRunning = false;
+
+    public BossAttackController boss;
+
 
     // =================================================
     // 플레이어가 위험 블럭 위에 있는지 체크용
@@ -71,8 +77,9 @@ public class WarningManagerStage2 : MonoBehaviour
         shapes.Clear();
         Vector3Int V(int x, int y) => new Vector3Int(x, y, 0);
 
-        int maxW = boardWidth;
-        int maxH = boardHeight;
+        int maxW = Mathf.Min(boardWidth, maxBlockWidth);
+        int maxH = Mathf.Min(boardHeight, maxBlockHeight);
+
 
         int minW = Mathf.Clamp(4 + difficultyLevel, 4, maxW);
         int minH = Mathf.Clamp(3 + difficultyLevel / 2, 3, maxH);

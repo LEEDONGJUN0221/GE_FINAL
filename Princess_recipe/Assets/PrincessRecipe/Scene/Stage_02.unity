@@ -336,11 +336,10 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: -1432392535
-  m_SortingLayer: 4
+  m_SortingLayerID: 1275379315
+  m_SortingLayer: 2
   m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6,
-    type: 3}
+  m_Sprite: {fileID: 1905493088, guid: 33c539529d5267046ad71e5dee73b157, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -360,7 +359,7 @@ Transform:
   m_GameObject: {fileID: 279725173}
   serializedVersion: 2
   m_LocalRotation: {x: -0.36070505, y: -0, z: -0, w: 0.93267995}
-  m_LocalPosition: {x: 1.43, y: 15.9, z: 5.705776}
+  m_LocalPosition: {x: 1.43, y: 15.227156, z: 4.965993}
   m_LocalScale: {x: 5, y: 6, z: 0}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -583,7 +582,12 @@ PrefabInstance:
     - target: {fileID: 2734229325073307577, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3534635636353040675, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4713692583211097509, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
@@ -739,6 +743,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.y
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7665922705187847193, guid: 680ad995349094b478f1453334d0c8f2,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7987409224553242598, guid: 680ad995349094b478f1453334d0c8f2,
         type: 3}
@@ -2303,7 +2312,7 @@ MonoBehaviour:
   hpIcons: []
   hpFullSprite: {fileID: 21300000, guid: 51d395f5d4fd77a49b9bd7dfffc226a2, type: 3}
   hpBrokenSprite: {fileID: 21300000, guid: 428c0c4f28b52c74dab538a28244db25, type: 3}
-  chocolateGoal: 5
+  chocolateGoal: 10
   chocolateCount: 0
   chocolateText: {fileID: 1860203894}
 --- !u!4 &1847235403
@@ -2489,21 +2498,24 @@ MonoBehaviour:
   baseTilemap: {fileID: 2049524227}
   warningTilemap: {fileID: 949362247}
   obstacleTilemap: {fileID: 1117632814}
-  warningTile: {fileID: 11400000, guid: 3fd96ec01f54e8847a4ddfaa547b390e, type: 2}
-  chocolateObstacleTile: {fileID: 11400000, guid: 3fd96ec01f54e8847a4ddfaa547b390e,
+  warningTile: {fileID: 11400000, guid: 503ea1eb28b03ef47857af40f8a7ed9e, type: 2}
+  chocolateObstacleTile: {fileID: 11400000, guid: ae4d4be0620b1ba42ba35a9b088d859b,
     type: 2}
   boardMin: {x: -5, y: -3, z: 0}
   boardWidth: 10
   boardHeight: 10
+  maxBlockWidth: 9
+  maxBlockHeight: 9
   intervalMin: 1.8
   intervalMax: 3
   obstacleDuration: 5
   blinkCount: 3
   fadeDuration: 0.25
-  difficultyLevel: 1
+  difficultyLevel: 4
   chocolatePrefab: {fileID: 4938251828876247570, guid: 07c0a9dc7980c784ea97569e105ee579,
     type: 3}
-  chocolateDropChance: 1
+  chocolateDropChance: 0.5
+  boss: {fileID: 0}
 --- !u!4 &2015949734
 Transform:
   m_ObjectHideFlags: 0
