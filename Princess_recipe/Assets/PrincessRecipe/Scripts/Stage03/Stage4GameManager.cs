@@ -37,9 +37,9 @@ public class Stage4GameManager : MonoBehaviour
     private float playTime = 0f;
 
     [Header("Phase Speed (Fruit Count Based)")]
-    public float phase1BeatInterval = 2.20f;
-    public float phase2BeatInterval = 1.90f;
-    public float phase3BeatInterval = 1.50f;
+    public float phase1BeatInterval = 2.40f;
+    public float phase2BeatInterval = 2.20f;
+    public float phase3BeatInterval = 1.90f;
 
     // 같은 나무 연속 수확 금지
     private int lastCollectedTreeId = -1;
@@ -112,16 +112,28 @@ public class Stage4GameManager : MonoBehaviour
 
             vineSpawner.activeTime = vineSpawner.activeTimeBase;
 
-            // 2) 패턴 발동
-            vineSpawner.TriggerRandomPattern();
-
-            // 3) 페이즈별 속도 계산
+            // ✅ 2) 페이즈 먼저 계산
             int phase = GetPhaseByFruit();
-            float interval = GetBeatIntervalByPhase(phase);
 
+            // ✅ 3) 패턴 발동 (Phase1만 신규, Phase2/3는 기존)
+            if (phase == 1)
+            {
+                // 신규 Phase1: 랜덤 라인(행 OR 열) 1~2개
+                // (VinePatternSpawner에 TriggerRandomLines(min,max) 있어야 함)
+                vineSpawner.TriggerRandomLines(2, 3);
+            }
+            else
+            {
+                // Phase2/3: 기존 홀/짝 행/열 4패턴 랜덤
+                vineSpawner.TriggerRandomPattern();
+            }
+
+            // 4) 페이즈별 속도 계산
+            float interval = GetBeatIntervalByPhase(phase);
             yield return new WaitForSeconds(interval);
         }
     }
+
 
 
     

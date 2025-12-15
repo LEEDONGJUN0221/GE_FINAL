@@ -2088,7 +2088,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31c9bf755a46f56418fd9c9b1e72ba0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHP: 100
+  maxHP: 4
   currentHP: 0
   vineSpawner: {fileID: 755236260}
   beatInterval: 1.2
@@ -2103,9 +2103,9 @@ MonoBehaviour:
   resultPanel: {fileID: 538606238}
   resultText: {fileID: 1278306685}
   restartSceneName: 
-  phase1BeatInterval: 1.2
-  phase2BeatInterval: 0.9
-  phase3BeatInterval: 0.65
+  phase1BeatInterval: 2.4
+  phase2BeatInterval: 2.2
+  phase3BeatInterval: 1.9
 --- !u!4 &1320641150
 Transform:
   m_ObjectHideFlags: 0

@@ -42,6 +42,83 @@ public class VinePatternSpawner : MonoBehaviour
             if (p != null) playerTransform = p.transform;
         }
     }
+    
+
+    public void TriggerRandomLines(int minLines, int maxLines)
+    {
+        if (referenceTilemap == null || telegraphPrefab == null || vinePrefab == null)
+        {
+            Debug.LogError("[VinePatternSpawner] Missing references.");
+            return;
+        }
+
+        if (running != null) StopCoroutine(running);
+        running = StartCoroutine(CoRunRandomLines(minLines, maxLines));
+    }
+
+    private IEnumerator CoRunRandomLines(int minLines, int maxLines)
+    {
+        ClearAllImmediate();
+
+        patternId++;
+
+        // 행만/열만 랜덤 선택
+        bool useRows = (Random.Range(0, 2) == 0);
+
+        int count = Random.Range(minLines, maxLines + 1);
+        count = Mathf.Clamp(count, 1, gridSize);
+
+        // 중복 없이 라인 인덱스 선택
+        HashSet<int> picked = new HashSet<int>();
+        while (picked.Count < count)
+            picked.Add(Random.Range(0, gridSize));
+
+        // 1) Telegraph
+        foreach (int line in picked)
+            SpawnSingleLine(useRows, line, telegraphPrefab, -1);
+
+        yield return new WaitForSeconds(telegraphTime);
+
+        // 2) Clear Telegraph
+        ClearAllImmediate();
+
+        // 3) Vine
+        foreach (int line in picked)
+            SpawnSingleLine(useRows, line, vinePrefab, patternId);
+
+        yield return new WaitForSeconds(activeTime);
+
+        // 4) Clear Vine
+        ClearAllImmediate();
+
+        running = null;
+    }
+
+    private void SpawnSingleLine(bool useRows, int lineIndex, GameObject prefab, int pid)
+    {
+        // useRows=true: lineIndex번째 "행" 전체
+        // useRows=false: lineIndex번째 "열" 전체
+        for (int i = 0; i < gridSize; i++)
+        {
+            int r = useRows ? lineIndex : i;
+            int c = useRows ? i : lineIndex;
+
+            int cellX = originCell.x + c;
+            int cellY = originCell.y + r;
+            Vector3Int cellPos = new Vector3Int(cellX, cellY, 0);
+
+            Vector3 worldCenter = referenceTilemap.GetCellCenterWorld(cellPos);
+            GameObject obj = Instantiate(prefab, worldCenter, Quaternion.identity, transform);
+            spawned.Add(obj);
+
+            if (pid >= 0)
+            {
+                VineDamageZone dmg = obj.GetComponent<VineDamageZone>();
+                if (dmg != null) dmg.SetPatternId(pid);
+            }
+        }
+    }
+
 
     public void TriggerRandomPattern()
     {
