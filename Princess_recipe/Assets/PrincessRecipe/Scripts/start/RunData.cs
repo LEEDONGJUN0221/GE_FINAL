@@ -10,7 +10,16 @@ public class RunData : MonoBehaviour
 
     private void Awake()
     {
-        if (I != null && I != this) { Destroy(gameObject); return; }
+        // 🔴 에디터 상태에서 DontDestroyOnLoad 절대 호출 금지
+        if (!Application.isPlaying)
+            return;
+
+        if (I != null && I != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         I = this;
         DontDestroyOnLoad(gameObject);
     }
@@ -20,6 +29,6 @@ public class RunData : MonoBehaviour
         int c1 = Mathf.Max(0, choice1);
         int c2 = Mathf.Max(0, choice2);
         int c3 = Mathf.Max(0, choice3);
-        return c1 * 1 + c2 * 2 + c3 * 4; // 0~7
+        return c1 + c2 * 2 + c3 * 4;
     }
 }
