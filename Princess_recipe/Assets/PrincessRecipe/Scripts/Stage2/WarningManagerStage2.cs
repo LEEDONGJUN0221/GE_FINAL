@@ -151,7 +151,11 @@ public class WarningManagerStage2 : MonoBehaviour
     // 4. 경고 → 깜빡임 → 장애물 → 제거 + 초콜릿
     // =================================================
     IEnumerator WarningCoroutine(List<Vector3Int> cells)
-    {
+    {   
+        // 보스 공격 연출
+        if (boss != null)
+            boss.PlayAttack();
+
         // 1️⃣ 경고 타일 찍기
         foreach (var c in cells)
             warningTilemap.SetTile(c, warningTile);
