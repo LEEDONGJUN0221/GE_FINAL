@@ -41,6 +41,15 @@ public class Stage4GameManager : MonoBehaviour
     public float phase2BeatInterval = 2.20f;
     public float phase3BeatInterval = 1.90f;
 
+    [Header("Phase Transition FX")]
+    public float phasePauseDuration = 0.35f;   // 페이즈 전환 시 멈춤 시간
+    public float shakeDuration = 0.25f;        // 카메라 흔들림 시간
+    public float shakeMagnitude = 0.20f;       // 흔들림 크기(월드 단위)
+
+    private int lastPhase = -1;                // 직전 페이즈 기록
+    private Vector3 camBasePos;                // 카메라 원래 위치
+
+
     // 같은 나무 연속 수확 금지
     private int lastCollectedTreeId = -1;
 
@@ -66,6 +75,8 @@ public class Stage4GameManager : MonoBehaviour
 
         UpdateUI();
         StartCoroutine(CoPatternLoop());
+        camBasePos = Camera.main.transform.position;
+
     }
 
     private void Update()
@@ -114,11 +125,14 @@ public class Stage4GameManager : MonoBehaviour
 
             // ✅ 2) 페이즈 먼저 계산
             int phase = GetPhaseByFruit();
-
+            if (phase != lastPhase)
+            {
+                lastPhase = phase;
+                yield return StartCoroutine(CoOnPhaseChanged(phase));
+            }
             // ✅ 3) 패턴 발동 (Phase1만 신규, Phase2/3는 기존)
             if (phase == 1)
             {
-                // 신규 Phase1: 랜덤 라인(행 OR 열) 1~2개
                 // (VinePatternSpawner에 TriggerRandomLines(min,max) 있어야 함)
                 vineSpawner.TriggerRandomLines(2, 3);
             }
@@ -242,4 +256,48 @@ public class Stage4GameManager : MonoBehaviour
         if (fruitTMP) fruitTMP.text = fruitStr;
         if (timeTMP) timeTMP.text = timeStr;
     }
+
+    private IEnumerator CoCameraShakeRealtime(float duration, float magnitude)
+    {
+        if (Camera.main == null) yield break;
+
+        Transform cam = Camera.main.transform;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+
+            float offsetX = Random.Range(-magnitude, magnitude);
+            float offsetY = Random.Range(-magnitude, magnitude);
+
+            cam.position = camBasePos + new Vector3(offsetX, offsetY, 0f);
+
+            yield return null;
+        }
+
+        cam.position = camBasePos;
+    }
+
+
+    private IEnumerator CoOnPhaseChanged(int newPhase)
+    {
+        // 1) 잠깐 멈춤
+        Time.timeScale = 0f;
+
+        // 2) 흔들림 (Realtime로 돌아가야 멈춘 상태에서도 동작함)
+        yield return StartCoroutine(CoCameraShakeRealtime(shakeDuration, shakeMagnitude));
+
+        // 3) 멈춤 유지 시간 (원하면 shake랑 별개로 더 줄 수도 있음)
+        yield return new WaitForSecondsRealtime(phasePauseDuration);
+
+        // 4) 재개
+        Time.timeScale = 1f;
+
+        // (선택) 페이즈 로그
+        Debug.Log($"[Stage4] Phase Changed => {newPhase}");
+    }
+
+
+
 }
