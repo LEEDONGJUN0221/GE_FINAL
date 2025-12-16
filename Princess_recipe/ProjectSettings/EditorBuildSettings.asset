@@ -20,5 +20,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/PrincessRecipe/Scene/Stage_03.unity
     guid: 44c9f8a6176b41346bfbfaeadc86b76b
+  - enabled: 1
+    path: Assets/PrincessRecipe/Scene/Ending.unity
+    guid: 71eefa640366e4e4e8f8d509d536a09c
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

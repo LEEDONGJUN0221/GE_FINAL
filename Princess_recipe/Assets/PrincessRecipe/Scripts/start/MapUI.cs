@@ -80,4 +80,26 @@ public class MapUI : MonoBehaviour
 
         SceneManager.LoadScene(sceneName);
     }
+    // 선택 없이 엔딩으로 이동
+    public void OpenEnding(string nextScene)
+    {
+        nextSceneName = nextScene;
+
+        if (mapPanel != null)
+            mapPanel.SetActive(true);
+
+        Time.timeScale = 0f;
+        if (playerMove != null)
+            playerMove.enabled = false;
+    }
+    public void GoEnding()
+    {
+        if (isLoading) return;
+
+        if (mapPanel != null) mapPanel.SetActive(false);
+        Time.timeScale = 1f;
+
+        StartCoroutine(LoadStageRoutine(nextSceneName));
+    }
+
 }

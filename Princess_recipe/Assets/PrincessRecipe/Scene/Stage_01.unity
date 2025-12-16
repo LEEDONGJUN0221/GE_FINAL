@@ -9865,7 +9865,7 @@ MonoBehaviour:
   mapPanel: {fileID: 8562013766194610075}
   loadingPanel: {fileID: 8702893256008036748}
   playerMove: {fileID: 2493943099208830563}
-  loadingSeconds: 5
+  loadingSeconds: 2
   choiceIndex: 1
   nextSceneName: Stage_02
 --- !u!222 &5392875832768475299
