@@ -67,26 +67,34 @@ public class VineDamageZone : MonoBehaviour
         TryDamage(other);
     }
 
+
+
+
     private void TryDamage(Collider2D other)
     {
-        if (hasDamaged) return;
         if (!other.CompareTag("Player")) return;
 
+        // 1) 플레이어가 "이번 패턴(patternId)에서 이미 맞았는지"를 플레이어 쪽에서 판단
+        PlayerStatus st = other.GetComponent<PlayerStatus>();
+        if (st == null) return;
+
+        // ✅ 핵심: 같은 patternId면 false를 반환해서 데미지/슬로우/플래시 전부 막음
+        if (!st.TryConsumeVineHit(patternId))
+            return;
+
+        // 2) 데미지 1회 적용 (패턴당 1회)
         if (Stage4GameManager.Instance != null)
             Stage4GameManager.Instance.TakeDamage(damagePerHit);
 
+        // 3) 부가 효과(슬로우/플래시)도 패턴당 1회만 적용
         if (applySlow)
-        {
-            PlayerStatus st = other.GetComponent<PlayerStatus>();
-            if (st != null) st.ApplySlow();
-        }
+            st.ApplySlow();
 
-        hasDamaged = true; // 패턴당 1회
         PlayerHitFlash flash = other.GetComponent<PlayerHitFlash>();
-        if (flash != null) flash.Flash();
-
-
+        if (flash != null)
+            flash.Flash();
     }
+
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()

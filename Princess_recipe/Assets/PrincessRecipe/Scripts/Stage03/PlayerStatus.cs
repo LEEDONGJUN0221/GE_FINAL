@@ -11,6 +11,7 @@ public class PlayerStatus : MonoBehaviour
     public float slowMoveDelay = 0.6f;   // 슬로우 상태에서의 Move Delay
     public float slowDuration = 1.0f;    // 슬로우 유지 시간
 
+    private int lastVinePatternHitId = -1;
     private Coroutine slowCoroutine;
 
     private void Start()
@@ -59,5 +60,14 @@ public class PlayerStatus : MonoBehaviour
         {
             gridMovement.moveDelay = normalMoveDelay;
         }
+    }
+
+    public bool TryConsumeVineHit(int patternId)
+    {
+        if (patternId == lastVinePatternHitId)
+            return false;
+
+        lastVinePatternHitId = patternId;
+        return true;
     }
 }

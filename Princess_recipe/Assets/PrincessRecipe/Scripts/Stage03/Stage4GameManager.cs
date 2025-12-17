@@ -37,6 +37,9 @@ public class Stage4GameManager : MonoBehaviour
     public GameObject resultPanel;
     public TMP_Text resultText;
 
+    [Header("Restart")]
+    public string restartSceneName;
+
     [Header("Phase Speed (Fruit Count Based)")]
     public float phase1BeatInterval = 2.40f;
     public float phase2BeatInterval = 2.20f;
@@ -95,6 +98,23 @@ public class Stage4GameManager : MonoBehaviour
 
         StartCoroutine(CoPatternLoop());
     }
+
+    public void Restart()
+    {
+        // 결과 패널에서 게임 멈춰둔 상태(TimeScale=0) 복구
+        Time.timeScale = 1f;
+
+        // restartSceneName 비어있으면 현재 씬 재시작
+        if (string.IsNullOrEmpty(restartSceneName))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+        else
+        {
+            SceneManager.LoadScene(restartSceneName);
+        }
+    }
+
 
     private void Update()
     {
