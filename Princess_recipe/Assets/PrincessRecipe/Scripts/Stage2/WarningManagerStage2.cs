@@ -42,6 +42,7 @@ public class WarningManagerStage2 : MonoBehaviour
     private List<Vector3Int[]> shapes = new List<Vector3Int[]>();
     private bool isRunning = false;
 
+    [Header("Boss")]
     public BossAttackController boss;
 
 
@@ -146,6 +147,7 @@ public class WarningManagerStage2 : MonoBehaviour
 
         StartCoroutine(WarningCoroutine(cells));
     }
+
 
     // =================================================
     // 4. 경고 → 깜빡임 → 장애물 → 제거 + 초콜릿

@@ -250,6 +250,7 @@ GameObject:
   m_Component:
   - component: {fileID: 279725175}
   - component: {fileID: 279725174}
+  - component: {fileID: 279725176}
   m_Layer: 0
   m_Name: Boss
   m_TagString: Untagged
@@ -327,6 +328,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1530281181}
   m_LocalEulerAnglesHint: {x: -42.287, y: 0, z: 0}
+--- !u!114 &279725176
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 279725173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9deeaa8d3a111342b1427cd7264cf89, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spriteRenderer: {fileID: 279725174}
+  whiteIdleSprite: {fileID: -1168548042, guid: 0baac41d7c2a2c6439c7b538bab0e7ae, type: 3}
+  whiteAttackSprite: {fileID: 1851926988, guid: 8f6adc49a2300c7439e11567823536d9,
+    type: 3}
+  darkIdleSprite: {fileID: 1905493088, guid: 33c539529d5267046ad71e5dee73b157, type: 3}
+  darkAttackSprite: {fileID: -1134528425, guid: 272ab2356a97bfa41ae4f473d835795e,
+    type: 3}
+  attackImageDuration: 1
 --- !u!1 &399742532
 GameObject:
   m_ObjectHideFlags: 0
@@ -2108,7 +2129,7 @@ MonoBehaviour:
   chocolatePrefab: {fileID: 4938251828876247570, guid: 07c0a9dc7980c784ea97569e105ee579,
     type: 3}
   chocolateDropChance: 0.5
-  boss: {fileID: 0}
+  boss: {fileID: 279725176}
 --- !u!4 &2015949734
 Transform:
   m_ObjectHideFlags: 0
