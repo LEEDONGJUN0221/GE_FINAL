@@ -12,7 +12,12 @@ public class WarningManagerStage2 : MonoBehaviour
 
     [Header("타일")]
     public TileBase warningTile;
-    public TileBase chocolateObstacleTile;
+    // ⭐ 화이트 / 다크 장애물 타일 (인스펙터에서 넣을 것)
+    public TileBase whiteChocolateObstacleTile;
+    public TileBase darkChocolateObstacleTile;
+
+    // ⭐ 실제로 사용할 타일 (런타임에 자동 결정)
+    private TileBase chocolateObstacleTile;
 
     [Header("보드 범위 (Cell 좌표)")]
     public Vector3Int boardMin = new Vector3Int(-5, -3, 0);
@@ -44,6 +49,25 @@ public class WarningManagerStage2 : MonoBehaviour
 
     [Header("Boss")]
     public BossAttackController boss;
+
+    void Start()
+    {
+        ApplyObstacleThemeFromRunData();
+    }
+
+    private void ApplyObstacleThemeFromRunData()
+    {
+        // 기본값은 다크
+        int choice = (RunData.I != null) ? RunData.I.choice1 : 1;
+
+        bool isWhite = (choice == 0);
+
+        chocolateObstacleTile = isWhite
+            ? whiteChocolateObstacleTile
+            : darkChocolateObstacleTile;
+
+        Debug.Log($"[ObstacleTile] {(isWhite ? "WHITE" : "DARK")} selected");
+    }
 
 
     // =================================================

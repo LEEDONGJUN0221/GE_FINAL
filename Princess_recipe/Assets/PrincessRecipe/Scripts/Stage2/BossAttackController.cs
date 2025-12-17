@@ -17,7 +17,7 @@ public class BossAttackController : MonoBehaviour
     [Header("Attack Timing")]
     public float attackImageDuration = 1.0f;
 
-    // 현재 선택에 따라 실제로 사용할 스프라이트(자동 세팅됨)
+    // 현재 선택에 따라 실제로 사용할 스프라이트
     private Sprite idleSprite;
     private Sprite attackSprite;
 
@@ -25,21 +25,25 @@ public class BossAttackController : MonoBehaviour
 
     void Awake()
     {
+        // SpriteRenderer 자동 연결
         if (spriteRenderer == null)
             spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     void Start()
     {
+        // Stage1 선택값 기준으로 보스 테마 결정
         ApplyThemeFromRunData();
+
+        // 시작 시 기본 이미지
         SetIdle();
     }
 
-    // ✅ Stage1 선택값에 따라 스프라이트 자동 선택
+    // 🔑 Stage1에서 고른 초콜릿 타입 반영
     private void ApplyThemeFromRunData()
     {
-        // 기본값: Dark로 fallback
-        int choice = (RunData.I != null) ? RunData.I.choice1 : 1; // Stage1 선택값
+        // 기본값은 Dark (안전장치)
+        int choice = (RunData.I != null) ? RunData.I.choice1 : 1;
 
         bool isWhite = (choice == 0);
 
@@ -55,7 +59,7 @@ public class BossAttackController : MonoBehaviour
         }
     }
 
-    // WarningManager에서 호출
+    // ⚔️ WarningManagerStage2에서 호출
     public void PlayAttack()
     {
         if (attackRoutine != null)
@@ -66,11 +70,13 @@ public class BossAttackController : MonoBehaviour
 
     private IEnumerator AttackRoutine()
     {
+        // 공격 이미지
         if (spriteRenderer != null && attackSprite != null)
             spriteRenderer.sprite = attackSprite;
 
         yield return new WaitForSeconds(attackImageDuration);
 
+        // 다시 기본 이미지
         SetIdle();
         attackRoutine = null;
     }

@@ -2113,7 +2113,9 @@ MonoBehaviour:
   warningTilemap: {fileID: 949362247}
   obstacleTilemap: {fileID: 1117632814}
   warningTile: {fileID: 11400000, guid: 503ea1eb28b03ef47857af40f8a7ed9e, type: 2}
-  chocolateObstacleTile: {fileID: 11400000, guid: ae4d4be0620b1ba42ba35a9b088d859b,
+  whiteChocolateObstacleTile: {fileID: 11400000, guid: ae4d4be0620b1ba42ba35a9b088d859b,
+    type: 2}
+  darkChocolateObstacleTile: {fileID: 11400000, guid: af11a91f151a87c4ba6215aacb1999d8,
     type: 2}
   boardMin: {x: -5, y: -3, z: 0}
   boardWidth: 10
