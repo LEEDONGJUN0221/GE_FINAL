@@ -19,6 +19,9 @@ public class Stage4GameManager : MonoBehaviour
     public int targetFruitCount = 16;
     public int currentFruitCount = 0;
 
+    [Header("Boss Visual")]
+    public Stage3BossAttackController bossAttackController;
+
     [Header("UI (둘 중 하나만 연결해도 됨)")]
     public Text hpText;
     public Text fruitText;
@@ -168,6 +171,11 @@ public class Stage4GameManager : MonoBehaviour
                 }
             }
 
+            // ✅ 추가: telegraph 동안 보스 ATTACK 스프라이트로
+            if (bossAttackController != null)
+                bossAttackController.SetAttackForSeconds(vineSpawner.telegraphTime);
+
+            // 패턴 발동
             if (phase == 1) vineSpawner.TriggerRandomLines(2, 3);
             else vineSpawner.TriggerRandomPattern();
 
@@ -175,6 +183,7 @@ public class Stage4GameManager : MonoBehaviour
             yield return new WaitForSeconds(interval);
         }
     }
+
 
     // ---------------- Damage ----------------
     public void TakeDamage(int damage)
