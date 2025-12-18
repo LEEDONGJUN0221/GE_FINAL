@@ -1,6 +1,7 @@
     using UnityEngine;
     using UnityEngine.UI;
     using TMPro;
+    using UnityEngine.SceneManagement;
 
     public class GameManagerStage2 : MonoBehaviour
     {
@@ -10,7 +11,7 @@
         public GameObject startPanel;
         public GameObject gameOverPanel;
 
-        [Header("★ Clear는 MapUI가 처리")]
+        [Header("Clear는 MapUI가 처리")]
         public MapUI mapUI;          // Stage2 씬에 있는 MapUI
         public string nextSceneName = "Stage3";
         public int choiceIndex = 2;  // Stage2 → Stage3 선택
@@ -24,9 +25,21 @@
         public Sprite hpBrokenSprite;
 
         [Header("Chocolate")]
-        public int chocolateGoal = 30;
+        public int chocolateGoal = 10;
         public int chocolateCount = 0;
         public TextMeshProUGUI chocolateText;
+
+        [Header("Sound")]
+        public AudioClip damageSound;
+
+        [Header("BGM")]
+        public AudioClip stageBGM;
+        [Range(0f, 1f)] public float bgmVolume = 0.5f;
+
+        private AudioSource bgmSource;
+
+        private AudioSource audioSource;
+
 
         private WarningManagerStage2 warningManager;
 
@@ -40,6 +53,18 @@
 
             if (mapUI == null)
                 mapUI = FindAnyObjectByType<MapUI>();
+
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+
+            bgmSource = gameObject.AddComponent<AudioSource>();
+            bgmSource.clip = stageBGM;
+            bgmSource.loop = true;
+            bgmSource.volume = bgmVolume;
+            bgmSource.Play();
+
+
         }
 
         void Start()
@@ -63,15 +88,29 @@
 
         // =====================
         public void TakeDamage(int amount)
-        {
+        {   
             if (currentHP <= 0) return;
 
+
+            if (damageSound != null)
+                audioSource.PlayOneShot(damageSound);
+
+            //  HP 감소
             currentHP = Mathf.Max(0, currentHP - amount);
             UpdateHPUI();
 
+            //  초콜릿 1 감소 (0 이하면 감소 안 함)
+            if (chocolateCount > 0)
+            {
+                chocolateCount -= 1;
+                UpdateChocolateUI();
+            }
+
+            // 사망 체크
             if (currentHP <= 0)
                 OnPlayerDeath();
         }
+
 
         void UpdateHPUI()
         {
@@ -83,7 +122,10 @@
         }
 
         void OnPlayerDeath()
-        {
+        {   
+            if (bgmSource != null)
+                bgmSource.Stop();
+
             if (warningManager != null)
                 warningManager.enabled = false;
 
@@ -113,6 +155,9 @@
         void OnStageClear()
         {
             Debug.Log("[Stage2] CLEAR");
+            
+            if (bgmSource != null)
+                bgmSource.Stop();
 
             if (warningManager != null)
                 warningManager.enabled = false;
@@ -127,5 +172,22 @@
                 Debug.LogError("MapUI 없음!");
                 Time.timeScale = 0f;
             }
+
+        }
+        public void QuitGame()
+        {  
+            Time.timeScale = 1f;
+
+    #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+    #else
+            Application.Quit();
+    #endif
+        }
+
+        public void RestartGame()
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
     }

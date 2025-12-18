@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 701647562200506004}
   - component: {fileID: -3816792468946034519}
   - component: {fileID: 5428212216075415129}
+  - component: {fileID: 3793480812858813724}
   m_Layer: 7
   m_Name: ChocolatePiece
   m_TagString: Untagged
@@ -128,7 +129,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 20, y: 20}
+    oldSize: {x: 2.6666667, y: 2.6666667}
     newSize: {x: 9.654546, y: 9.654546}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -176,3 +177,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   value: 1
+--- !u!114 &3793480812858813724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4938251828876247570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6312e473fafc19149b95596164c985a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  whiteSprite: {fileID: 21300000, guid: 5ae50b9ed137f9240aba458d2a5b52ad, type: 3}
+  darkSprite: {fileID: 21300000, guid: b14f101cb0bf7c74bbe5f35b2dd2890b, type: 3}
+  lifetime: 8
+  blinkCount: 3
+  blinkInterval: 0.1
+  pickupSound: {fileID: 8300000, guid: d14e58f8d4251e94eb7bdce1e25834d0, type: 3}

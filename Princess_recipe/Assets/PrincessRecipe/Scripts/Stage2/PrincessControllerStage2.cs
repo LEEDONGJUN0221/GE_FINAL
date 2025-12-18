@@ -18,13 +18,31 @@ public class PrincessControllerStage2 : MonoBehaviour
 
     [Header("무적 / 깜빡임 설정")]
     [Tooltip("피격 후 무적 시간(초)")]
-    public float invincibleDuration = 2f;
+    public float invincibleDuration = 1f;
 
     [Tooltip("무적 중 깜빡임 간격(초)")]
     public float blinkInterval = 0.1f;
 
     [Tooltip("위험 블럭 태그 이름")]
     public string obstacleTag = "Stage2_Obstacle";
+
+    [Header("Dust Effect")]
+    public GameObject dustPrefab;
+    public float dustLifetime = 0.5f;
+
+    public Vector2 dustOffsetLeft  = new Vector2(-0.1f, -0.1f);
+    public Vector2 dustOffsetRight = new Vector2( 0.1f, -0.1f);
+    public Vector2 dustOffsetUp    = new Vector2( 0f,   -0.05f);
+    public Vector2 dustOffsetDown  = new Vector2( 0f,   -0.15f);
+
+
+    [Header("사운드")]
+    public AudioClip moveSound;
+    [Range(0f, 1f)]
+    public float moveVolume = 0.03f;   // ← 여기서 크기 조절
+    private AudioSource audioSource;
+
+
 
    
 
@@ -48,6 +66,11 @@ public class PrincessControllerStage2 : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+
+
         rb = GetComponent<Rigidbody2D>();
         if (rb != null)
         {
@@ -89,6 +112,7 @@ public class PrincessControllerStage2 : MonoBehaviour
         {
             Debug.LogError("[PrincessControllerStage2] WarningManagerStage2를 찾지 못했습니다!");
         }
+
 
 
     }
@@ -178,12 +202,17 @@ public class PrincessControllerStage2 : MonoBehaviour
 
         // 6. 이동 실행
         Vector3 targetPos = grid.GetCellCenterWorld(nextCell);
+        SpawnDust(transform.position, dir);
         StartCoroutine(MoveToCell(nextCell, targetPos));
     }
 
     IEnumerator MoveToCell(Vector3Int nextCell, Vector3 targetPos)
     {
         isMoving = true;
+
+        if (moveSound != null)
+            audioSource.PlayOneShot(moveSound);
+
 
         Vector3 startPos = transform.position;
         float elapsed = 0f;
@@ -215,6 +244,7 @@ public class PrincessControllerStage2 : MonoBehaviour
             TryMove(d, bd);
         }
 
+        
     }
 
 
@@ -265,6 +295,45 @@ public class PrincessControllerStage2 : MonoBehaviour
 
 
 
+    void SpawnDust(Vector3 worldPos, Vector2 dir)
+    {
+        if (dustPrefab == null || grid == null) return;
+
+        // 떠난 셀의 중앙
+        Vector3Int cell = grid.WorldToCell(worldPos);
+        Vector3 center = grid.GetCellCenterWorld(cell);
+
+        Vector2 offset = Vector2.zero;
+
+        if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+        {
+            if (dir.x > 0) offset = dustOffsetRight;
+            else if (dir.x < 0) offset = dustOffsetLeft;
+        }
+        else
+        {
+            if (dir.y > 0) offset = dustOffsetUp;
+            else if (dir.y < 0) offset = dustOffsetDown;
+        }
+
+        center += (Vector3)offset;
+
+        GameObject dust = Instantiate(dustPrefab, center, Quaternion.identity);
+
+        // flip 처리
+        SpriteRenderer sr = dust.GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            if (dir.x > 0) sr.flipX = true;
+            else if (dir.x < 0) sr.flipX = false;
+
+            if (dir.y > 0) sr.flipY = true;
+            else if (dir.y < 0) sr.flipY = false;
+        }
+
+        if (dustLifetime > 0f)
+            Destroy(dust, dustLifetime);
+    }
 
 }
 
