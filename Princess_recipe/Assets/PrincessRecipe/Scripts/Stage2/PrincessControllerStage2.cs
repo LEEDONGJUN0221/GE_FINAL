@@ -133,28 +133,32 @@ public class PrincessControllerStage2 : MonoBehaviour
         }
 
         // =================================================
-        // 2. 입력 받기 (GetKeyDown → 꾹 눌러도 1회 이동)
+        // 2. 입력 받기 (WASD + 방향키 / GetKeyDown)
         //    이동 중이어도 입력은 "버퍼"에 저장한다
         // =================================================
         Vector3Int delta = Vector3Int.zero;
         Vector2 dir = Vector2.zero;
 
-        if (Input.GetKeyDown(KeyCode.D))
+        // 오른쪽
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
             delta = Vector3Int.right;
             dir = Vector2.right;
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        // 왼쪽
+        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             delta = Vector3Int.left;
             dir = Vector2.left;
         }
-        else if (Input.GetKeyDown(KeyCode.W))
+        // 위
+        else if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
             delta = Vector3Int.up;
             dir = Vector2.up;
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        // 아래
+        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
             delta = Vector3Int.down;
             dir = Vector2.down;
@@ -163,6 +167,7 @@ public class PrincessControllerStage2 : MonoBehaviour
         {
             return; // 아무 키도 안 눌렸으면 종료
         }
+
 
         // =================================================
         // 3. 이동 중이면 → 버퍼에 저장하고 끝
