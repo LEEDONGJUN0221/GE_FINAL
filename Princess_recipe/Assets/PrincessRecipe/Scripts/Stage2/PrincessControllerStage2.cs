@@ -293,6 +293,10 @@ public class PrincessControllerStage2 : MonoBehaviour
 
         GameManagerStage2.Instance.TakeDamage(1);
 
+            //  카메라 흔들기
+        if (CameraShake.Instance != null)
+            CameraShake.Instance.Shake(0.15f, 0.12f);
+
         if (invincibleRoutine != null)
             StopCoroutine(invincibleRoutine);
 

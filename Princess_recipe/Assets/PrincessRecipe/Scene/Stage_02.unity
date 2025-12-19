@@ -632,7 +632,7 @@ MonoBehaviour:
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
-  m_fontStyle: 0
+  m_fontStyle: 1
   m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
@@ -694,7 +694,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 113, y: 282}
+  m_AnchoredPosition: {x: 108, y: 228}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &949362244
@@ -856,6 +856,7 @@ GameObject:
   - component: {fileID: 961739752}
   - component: {fileID: 961739751}
   - component: {fileID: 961739750}
+  - component: {fileID: 961739754}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -981,6 +982,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &961739754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 961739749}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e8aa07ce93d2ea46ae8a93ce1c3fe44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1117632811
 GameObject:
   m_ObjectHideFlags: 0
@@ -2160,7 +2173,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 611, y: 396}
+  m_AnchoredPosition: {x: 611, y: 317}
   m_SizeDelta: {x: 260, y: 65}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1809975434
@@ -2250,6 +2263,7 @@ MonoBehaviour:
   damageSound: {fileID: 8300000, guid: 4c0326ce7ef8b7b449b3c60662e7b9e9, type: 3}
   stageBGM: {fileID: 8300000, guid: 905023f48ea23774bb3afb55a65d35e4, type: 3}
   bgmVolume: 0.5
+  scoreUI: {fileID: 6845057506559800056}
 --- !u!4 &1847235403
 Transform:
   m_ObjectHideFlags: 0
@@ -14279,8 +14293,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 1
+  m_Sprite: {fileID: 21300000, guid: b14f101cb0bf7c74bbe5f35b2dd2890b, type: 3}
+  m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -14806,6 +14820,7 @@ GameObject:
   - component: {fileID: 6845057506559800054}
   - component: {fileID: 2631520864031565124}
   - component: {fileID: 487562722575979588}
+  - component: {fileID: 6845057506559800056}
   - component: {fileID: 6845057506559800055}
   m_Layer: 5
   m_Name: ScoreChocolate
@@ -16483,7 +16498,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 773.568, y: 388.6056}
+  m_AnchoredPosition: {x: 773.568, y: 308.6056}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6076003538160357475
@@ -16809,7 +16824,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -34, y: 283}
+  m_AnchoredPosition: {x: -44, y: 223}
   m_SizeDelta: {x: 140, y: 140}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6845057506559800055
@@ -16821,11 +16836,28 @@ MonoBehaviour:
   m_GameObject: {fileID: 1333488990909223568}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab38a35baa4440548b954790c83fea7e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  punchScale: 1.2
+  duration: 0.15
+--- !u!114 &6845057506559800056
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1333488990909223568}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0c201737a01e1694695a2c9e2f95be68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  whiteChocolateIcon: {fileID: 21300000, guid: 5ae50b9ed137f9240aba458d2a5b52ad, type: 3}
-  darkChocolateIcon: {fileID: 21300000, guid: b14f101cb0bf7c74bbe5f35b2dd2890b, type: 3}
+  whiteIcon: {fileID: 21300000, guid: 5ae50b9ed137f9240aba458d2a5b52ad, type: 3}
+  darkIcon: {fileID: 21300000, guid: b14f101cb0bf7c74bbe5f35b2dd2890b, type: 3}
+  icon: {fileID: 487562722575979588}
+  text: {fileID: 849484445}
+  punch: {fileID: 6845057506559800055}
 --- !u!224 &6920350976583363211
 RectTransform:
   m_ObjectHideFlags: 0
