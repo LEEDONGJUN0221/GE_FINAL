@@ -36,6 +36,10 @@ public class Stage4GameManager : MonoBehaviour
     public float clearToMapUIDelay = 2.0f; // 클리어 후 MapUI 나오기까지 시간
 
 
+    [Header("Pause")]
+    public GameObject pausePanel; // 일시정지 UI 패널
+    private bool isPaused = false;
+
     // ✅ (선택) 게임오버는 기존대로 ResultPanel 써도 되고, 빼도 됨
     [Header("Result UI (GameOver용 - 원하면 유지)")]
     public GameObject resultPanel;
@@ -115,6 +119,37 @@ public class Stage4GameManager : MonoBehaviour
         currentPatternId++;
         return currentPatternId;
     }
+
+    public void TogglePause()
+    {
+        if (isGameOver || isGameClear) return;
+
+        if (isPaused) ResumeGame();
+        else PauseGame();
+    }
+
+    public void PauseGame()
+    {
+        if (isPaused) return;
+
+        isPaused = true;
+        Time.timeScale = 0f;
+
+        if (pausePanel != null)
+            pausePanel.SetActive(true);
+    }
+
+    public void ResumeGame()
+    {
+        if (!isPaused) return;
+
+        isPaused = false;
+        Time.timeScale = 1f;
+
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+    }
+
 
     public void Restart()
     {

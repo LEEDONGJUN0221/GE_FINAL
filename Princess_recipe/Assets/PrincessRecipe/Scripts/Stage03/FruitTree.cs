@@ -1,4 +1,3 @@
-using System.Collections;
 using UnityEngine;
 
 public class FruitTree : MonoBehaviour
@@ -13,34 +12,48 @@ public class FruitTree : MonoBehaviour
     [Header("Optional Visuals (4개면 권장)")]
     public GameObject[] fruitVisuals;
 
-    [Header("Disappear Effect")]
-    public float disappearDuration = 0.5f; // 페이드 시간(추천 0.3~0.6)
-    public bool disableColliderImmediately = true;
+    // =======================
+    // NEW: Empty Tree Artwork
+    // =======================
+    [Header("Empty Tree Artwork")]
+    [Tooltip("열매가 0개가 되면 이 스프라이트로 교체됩니다.")]
+    public Sprite emptyTreeSprite;
 
-    private bool isDisappearing = false;
+    [Tooltip("트리 본체 스프라이트가 붙어있는 SpriteRenderer (비우면 자동으로 GetComponent로 찾습니다)")]
+    public SpriteRenderer treeRenderer;
 
-    // 플레이어가 범위 안에 있는 상태에서 사라질 수 있으므로 참조 보관
+    [Tooltip("열매 0개가 되면 상호작용(수확) 불가능하게 만들지 여부")]
+    public bool disableInteractionWhenEmpty = true;
+
+    [Tooltip("열매 0개가 되면 트리 Trigger Collider를 끌지 여부(추천: true)")]
+    public bool disableTriggerColliderWhenEmpty = true;
+
+    private bool isEmptyApplied = false;
+
+    // 플레이어가 범위 안에 있는 상태에서 상태가 바뀔 수 있으므로 참조 보관
     private PlayerInteractor currentInteractor;
     private Collider2D triggerCol;
-
-    // 페이드를 위해 트리 아래의 SpriteRenderer들을 잡아둠(자식 포함)
-    private SpriteRenderer[] renderers;
 
     private void Awake()
     {
         triggerCol = GetComponent<Collider2D>();
-        renderers = GetComponentsInChildren<SpriteRenderer>(true);
+
+        if (treeRenderer == null)
+            treeRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Start()
     {
         currentFruit = Mathf.Clamp(currentFruit, 0, maxFruit);
         RefreshVisual();
+
+        if (currentFruit <= 0)
+            ApplyEmptyState(); // 시작부터 0개일 수도 있으니 안전 처리
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (isDisappearing) return;
+        if (disableInteractionWhenEmpty && currentFruit <= 0) return;
         if (!other.CompareTag("Player")) return;
 
         currentInteractor = other.GetComponent<PlayerInteractor>();
@@ -63,7 +76,7 @@ public class FruitTree : MonoBehaviour
     // 플레이어가 Space 눌렀을 때 호출
     public bool TryCollectOne()
     {
-        if (isDisappearing) return false;
+        if (disableInteractionWhenEmpty && currentFruit <= 0) return false;
         if (currentFruit <= 0) return false;
 
         // 직전 나무 금지 규칙
@@ -82,18 +95,19 @@ public class FruitTree : MonoBehaviour
             Stage4GameManager.Instance.OnCollectedFromTree(treeId);
         }
 
-        // ✅ 0개가 되면 페이드 후 제거
+        // ✅ 0개가 되면 페이드/삭제 대신 “빈 나무 아트웍으로 교체”
         if (currentFruit <= 0)
         {
-            StartCoroutine(CoDisappear());
+            ApplyEmptyState();
         }
 
         return true;
     }
 
-    private IEnumerator CoDisappear()
+    private void ApplyEmptyState()
     {
-        isDisappearing = true;
+        if (isEmptyApplied) return;
+        isEmptyApplied = true;
 
         // 1) 상호작용 대상 해제
         if (currentInteractor != null)
@@ -102,39 +116,17 @@ public class FruitTree : MonoBehaviour
             currentInteractor = null;
         }
 
-        // 2) 콜라이더 비활성화(사라지는 중 추가 상호작용 방지)
-        if (disableColliderImmediately && triggerCol != null)
+        // 2) 트리 스프라이트 교체
+        if (treeRenderer != null && emptyTreeSprite != null)
+        {
+            treeRenderer.sprite = emptyTreeSprite;
+        }
+
+        // 3) Trigger Collider 끄기(더 이상 플레이어가 들어와도 currentTree가 잡히지 않게)
+        if (disableTriggerColliderWhenEmpty && triggerCol != null)
+        {
             triggerCol.enabled = false;
-
-        // 3) 페이드아웃
-        float t = 0f;
-
-        // 각 렌더러의 원래 색 저장(알파만 건드릴거라 RGB는 유지)
-        Color[] original = new Color[renderers.Length];
-        for (int i = 0; i < renderers.Length; i++)
-        {
-            if (renderers[i] == null) continue;
-            original[i] = renderers[i].color;
         }
-
-        while (t < disappearDuration)
-        {
-            t += Time.deltaTime;
-            float a = Mathf.Lerp(1f, 0f, t / disappearDuration);
-
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                if (renderers[i] == null) continue;
-                Color c = original[i];
-                c.a = a;
-                renderers[i].color = c;
-            }
-
-            yield return null;
-        }
-
-        // 4) 최종 제거
-        Destroy(gameObject);
     }
 
     private void RefreshVisual()
