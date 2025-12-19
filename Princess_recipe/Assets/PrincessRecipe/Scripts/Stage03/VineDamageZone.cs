@@ -5,6 +5,10 @@ public class VineDamageZone : MonoBehaviour
 {
     [Header("Damage")]
     public int damagePerHit = 1;
+    
+    [Header("SFX")]
+    public AudioSource sfxSource;
+    public AudioClip hurtClip;
 
     [Header("Optional Effects")]
     public bool applySlow = false;
@@ -19,6 +23,12 @@ public class VineDamageZone : MonoBehaviour
     {
         patternId = id;
     }
+
+    private void Awake()
+    {
+        if (sfxSource == null) sfxSource = GetComponent<AudioSource>();
+    }
+
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -54,6 +64,9 @@ public class VineDamageZone : MonoBehaviour
         // 실제 데미지
         if (Stage4GameManager.Instance != null)
             Stage4GameManager.Instance.TakeDamage(damagePerHit);
+
+        if (sfxSource != null && hurtClip != null)
+            sfxSource.PlayOneShot(hurtClip);
 
         // 부가효과(있으면 동작, 없으면 무시)
         if (applySlow)
