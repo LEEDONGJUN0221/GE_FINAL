@@ -6,7 +6,10 @@ public class GameManagerStage1 : MonoBehaviour
     private HUDManagerStage1 hudManager;
 
     [Header("UI 패널 연결")]
-    public GameObject gameOverPanel;   // ★ gameClearPanel 제거
+    public GameObject gameOverPanel;
+
+    [Header("일시정지 UI")]
+    public GameObject pausePanel;   // ★ 추가: Pause 패널
 
     [Header("다음 스테이지 선택 (MapUI가 패널/이동 담당)")]
     public MapUI mapUI;
@@ -20,6 +23,7 @@ public class GameManagerStage1 : MonoBehaviour
     private int currentHealth;
 
     private bool isGameClear = false;
+    private bool isPaused = false;  // ★ 추가: 현재 일시정지 상태
 
     [Header("BGM 설정")]
     public AudioClip stageBGM;
@@ -51,7 +55,9 @@ public class GameManagerStage1 : MonoBehaviour
 
         // 초기 UI 상태
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (pausePanel != null) pausePanel.SetActive(false); // ★ 추가
         Time.timeScale = 1f;
+        isPaused = false;
 
         currentScore = 0;
         currentHealth = maxHealth;
@@ -86,6 +92,10 @@ public class GameManagerStage1 : MonoBehaviour
     {
         if (isGameClear) return;
         isGameClear = true;
+
+        // ★ 혹시 멈춰있으면 풀어주기 (클리어 연출 코루틴이 진행되어야 함)
+        if (isPaused) ResumeGame();
+
         StartCoroutine(GameClearCoroutine(10f));
     }
 
@@ -97,7 +107,6 @@ public class GameManagerStage1 : MonoBehaviour
 
         if (gameClearBGM != null) PlayBGM(gameClearBGM, false);
 
-        // ★ 클리어 패널은 MapUI가 띄움 + 선택 진행
         if (mapUI != null)
         {
             mapUI.OpenChoice(choiceIndex, nextSceneName);
@@ -111,12 +120,51 @@ public class GameManagerStage1 : MonoBehaviour
 
     public void GameOver()
     {
+        // ★ 게임오버 되면 무조건 Pause 해제하고 패널 숨김
+        if (pausePanel != null) pausePanel.SetActive(false);
+        isPaused = false;
+
         if (gameOverBGM != null) PlayBGM(gameOverBGM, false);
 
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
         Time.timeScale = 0f;
 
         if (hudManager != null) hudManager.SetGameActive(false);
+    }
+
+    // =========================
+    // ★ 일시정지 기능
+    // =========================
+    public void TogglePause()
+    {
+        if (isGameClear) return;
+        if (gameOverPanel != null && gameOverPanel.activeSelf) return;
+
+        if (isPaused) ResumeGame();
+        else PauseGame();
+    }
+
+    public void PauseGame()
+    {
+        if (isGameClear) return;
+        if (gameOverPanel != null && gameOverPanel.activeSelf) return;
+
+        isPaused = true;
+        if (pausePanel != null) pausePanel.SetActive(true);
+
+        Time.timeScale = 0f;
+
+        if (hudManager != null) hudManager.SetGameActive(false); // 원하면 주석처리(멈춰도 HUD 숨기기 싫으면)
+    }
+
+    public void ResumeGame()
+    {
+        isPaused = false;
+        if (pausePanel != null) pausePanel.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        if (hudManager != null) hudManager.SetGameActive(true); // 위와 짝
     }
 
     public void QuitGame()
