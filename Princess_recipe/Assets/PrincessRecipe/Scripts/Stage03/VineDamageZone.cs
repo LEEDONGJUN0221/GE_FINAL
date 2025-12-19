@@ -1,109 +1,64 @@
+using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
 public class VineDamageZone : MonoBehaviour
 {
+    [Header("Damage")]
     public int damagePerHit = 1;
-    public bool applySlow = true;
 
-    [Header("Overlap Check (Spawn 시 겹침 보정)")]
-    public LayerMask playerLayer;          // 비워두면 Tag로만 체크
-    public bool checkOverlapOnEnable = true;
+    [Header("Optional Effects")]
+    public bool applySlow = false;
 
+    // 스포너가 주입해주는 "현재 패턴(턴) ID"
     private int patternId = -1;
-    private bool hasDamaged = false;
-    private Collider2D myCol;
 
-    public void SetPatternId(int newPatternId)
+    // "패턴당 1회"를 위해: 플레이어 instanceID -> 마지막으로 맞은 patternId
+    private static readonly Dictionary<int, int> playerLastHitPattern = new Dictionary<int, int>();
+
+    public void SetPatternId(int id)
     {
-        patternId = newPatternId;
-        hasDamaged = false;
-    }
-
-    private void Awake()
-    {
-        myCol = GetComponent<Collider2D>();
-    }
-
-    private void OnEnable()
-    {
-        // 가시가 "겹친 상태로 생성"되는 경우 Enter가 안 찍힐 수 있어서 보정
-        if (checkOverlapOnEnable)
-            StartCoroutine(CoOverlapCheckNextFixed());
-    }
-
-    private IEnumerator CoOverlapCheckNextFixed()
-    {
-        yield return new WaitForFixedUpdate();
-
-        if (hasDamaged) yield break;
-        if (myCol == null) yield break;
-
-        // 1) 레이어로 검사 가능하면 레이어로 (권장)
-        if (playerLayer.value != 0)
-        {
-            Collider2D hit = Physics2D.OverlapBox(myCol.bounds.center, myCol.bounds.size, 0f, playerLayer);
-            if (hit != null)
-            {
-                TryDamage(hit);
-                yield break;
-            }
-        }
-
-        // 2) 레이어를 안 쓰면 태그로 검사 (간단하지만 느림)
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        if (player != null)
-        {
-            Collider2D pc = player.GetComponent<Collider2D>();
-            if (pc != null && myCol.bounds.Intersects(pc.bounds))
-            {
-                TryDamage(pc);
-            }
-        }
+        patternId = id;
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        TryDamage(other);
+        TryDamageOncePerPattern(other);
+        // Debug.Log("[VineDamageZone] ENTER with: " + other.name + " tag=" + other.tag);
     }
 
-
-
-
-    private void TryDamage(Collider2D other)
+    private void OnTriggerStay2D(Collider2D other)
     {
+        // GridMovement가 "한 칸 순간이동/스냅"처럼 들어오는 경우,
+        // Enter를 놓칠 수 있어 Stay에서도 한 번 체크하되,
+        // 아래 로직이 "패턴당 1회"로 막아줌.
+        TryDamageOncePerPattern(other);
+    }
+
+    private void TryDamageOncePerPattern(Collider2D other)
+    {
+        if (other == null) return;
         if (!other.CompareTag("Player")) return;
 
-        // 1) 플레이어가 "이번 패턴(patternId)에서 이미 맞았는지"를 플레이어 쪽에서 판단
-        PlayerStatus st = other.GetComponent<PlayerStatus>();
-        if (st == null) return;
+        // 패턴ID 주입이 안 된 상태면, "패턴당 1회" 보장이 불가하므로 데미지 스킵
+        if (patternId < 0) return;
 
-        // ✅ 핵심: 같은 patternId면 false를 반환해서 데미지/슬로우/플래시 전부 막음
-        if (!st.TryConsumeVineHit(patternId))
+        int pid = other.gameObject.GetInstanceID();
+
+        // 동일 패턴에서 이미 맞았으면 종료
+        if (playerLastHitPattern.TryGetValue(pid, out int last) && last == patternId)
             return;
 
-        // 2) 데미지 1회 적용 (패턴당 1회)
+        // 기록(이번 패턴에 대해 1회 처리됨)
+        playerLastHitPattern[pid] = patternId;
+
+        // 실제 데미지
         if (Stage4GameManager.Instance != null)
             Stage4GameManager.Instance.TakeDamage(damagePerHit);
 
-        // 3) 부가 효과(슬로우/플래시)도 패턴당 1회만 적용
+        // 부가효과(있으면 동작, 없으면 무시)
         if (applySlow)
-            st.ApplySlow();
+            other.gameObject.SendMessage("ApplySlow", SendMessageOptions.DontRequireReceiver);
 
-        PlayerHitFlash flash = other.GetComponent<PlayerHitFlash>();
-        if (flash != null)
-            flash.Flash();
+        other.gameObject.SendMessage("Flash", SendMessageOptions.DontRequireReceiver);
     }
-
-
-#if UNITY_EDITOR
-    private void OnDrawGizmosSelected()
-    {
-        // OverlapBox 디버그 시각화
-        Collider2D col = GetComponent<Collider2D>();
-        if (col == null) return;
-
-        Gizmos.DrawWireCube(col.bounds.center, col.bounds.size);
-    }
-#endif
 }

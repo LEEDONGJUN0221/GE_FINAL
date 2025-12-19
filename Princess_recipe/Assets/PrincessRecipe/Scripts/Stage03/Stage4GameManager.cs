@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class Stage4GameManager : MonoBehaviour
 {
@@ -65,6 +66,12 @@ public class Stage4GameManager : MonoBehaviour
     // 같은 나무 연속 수확 금지
     private int lastCollectedTreeId = -1;
     
+    // 패턴 ID (패턴마다 +1)
+    private int currentPatternId = 0;
+
+    [Header ("BGM")]
+    public Stage4BgmController bgm;
+
 
     private void Awake()
     {
@@ -83,6 +90,7 @@ public class Stage4GameManager : MonoBehaviour
     private IEnumerator Start()
     {
         currentHP = maxHP;
+        bgm?.PlayPhase(GetPhaseByFruit(), force: true);
 
         if (vineSpawner == null)
         {
@@ -100,6 +108,12 @@ public class Stage4GameManager : MonoBehaviour
         }
 
         StartCoroutine(CoPatternLoop());
+    }
+
+    public int GetNextPatternId()
+    {
+        currentPatternId++;
+        return currentPatternId;
     }
 
     public void Restart()
@@ -163,7 +177,7 @@ public class Stage4GameManager : MonoBehaviour
             if (phase != lastPhase)
             {
                 lastPhase = phase;
-
+                bgm?.PlayPhase(phase);
                 if (cameraZoom != null && (phase == 2 || phase == 3))
                 {
                     cameraZoom.PlayBossCinematic(phase);
@@ -209,6 +223,8 @@ public class Stage4GameManager : MonoBehaviour
 
     private void GameOver()
     {
+        bgm?.PlayGameOver();
+
         if (isGameOver) return;
         isGameOver = true;
 
@@ -220,7 +236,9 @@ public class Stage4GameManager : MonoBehaviour
     }
 
     private void GameClear()
-    {
+    {   
+        bgm?.PlayClear();
+
         if (isGameClear) return;
         isGameClear = true;
 
@@ -285,7 +303,7 @@ public class Stage4GameManager : MonoBehaviour
     {
         string hpStr = $"HP: {currentHP}/{maxHP}";
         string fruitStr = $"Fruit: {currentFruitCount}/{targetFruitCount}";
-        string timeStr = $"Time: {playTime:0.0}s";
+        string timeStr = $"{playTime:0.0}s";
 
         if (hpText) hpText.text = hpStr;
         if (fruitText) fruitText.text = fruitStr;
