@@ -5042,8 +5042,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   grid: {fileID: 2938962264715988339}
   moveDelay: 0.3
-  minBounds: {x: -6, y: -5}
-  maxBounds: {x: 4, y: 24}
+  minBounds: {x: -6, y: -4}
+  maxBounds: {x: 4, y: 5}
   obstacleLayer:
     serializedVersion: 2
     m_Bits: 64
