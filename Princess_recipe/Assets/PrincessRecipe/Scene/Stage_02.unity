@@ -2043,7 +2043,7 @@ MonoBehaviour:
   dustOffsetRight: {x: 0.1, y: -0.1}
   dustOffsetUp: {x: 0, y: -0.05}
   dustOffsetDown: {x: 0, y: -0.15}
-  moveSound: {fileID: 0}
+  moveSound: {fileID: 8300000, guid: df6802ed7fc05ed4bb0d7a367989a32e, type: 3}
 --- !u!114 &1787353870
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2244,7 +2244,7 @@ MonoBehaviour:
   - {fileID: 4685063733492596067}
   hpFullSprite: {fileID: 21300000, guid: 51d395f5d4fd77a49b9bd7dfffc226a2, type: 3}
   hpBrokenSprite: {fileID: 21300000, guid: 428c0c4f28b52c74dab538a28244db25, type: 3}
-  chocolateGoal: 3
+  chocolateGoal: 7
   chocolateCount: 0
   chocolateText: {fileID: 849484445}
   damageSound: {fileID: 8300000, guid: 4c0326ce7ef8b7b449b3c60662e7b9e9, type: 3}
@@ -2305,14 +2305,14 @@ MonoBehaviour:
   boardMin: {x: -5, y: -3, z: 0}
   boardWidth: 10
   boardHeight: 10
-  maxBlockWidth: 9
-  maxBlockHeight: 9
-  intervalMin: 1.8
-  intervalMax: 3
-  obstacleDuration: 5
+  maxBlockWidth: 6
+  maxBlockHeight: 6
+  intervalMin: 1
+  intervalMax: 1.1
+  obstacleDuration: 3
   blinkCount: 3
   fadeDuration: 0.25
-  difficultyLevel: 4
+  difficultyLevel: 1
   chocolatePrefab: {fileID: 4938251828876247570, guid: 07c0a9dc7980c784ea97569e105ee579,
     type: 3}
   chocolateDropChance: 0.5

@@ -25,8 +25,8 @@ public class WarningManagerStage2 : MonoBehaviour
     public int boardHeight = 10;
 
     [Header("블럭 크기 제한")]
-    public int maxBlockWidth = 9;
-    public int maxBlockHeight = 9;
+    public int maxBlockWidth = 8;
+    public int maxBlockHeight = 8;
     [Header("시간 설정")]
     public float intervalMin = 1.2f;
     public float intervalMax = 2.5f;

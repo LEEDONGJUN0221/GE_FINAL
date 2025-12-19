@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: -3816792468946034519}
   - component: {fileID: 5428212216075415129}
   - component: {fileID: 3793480812858813724}
+  - component: {fileID: -2953419930935634890}
   m_Layer: 7
   m_Name: ChocolatePiece
   m_TagString: Untagged
@@ -195,3 +196,16 @@ MonoBehaviour:
   blinkCount: 3
   blinkInterval: 0.1
   pickupSound: {fileID: 8300000, guid: d14e58f8d4251e94eb7bdce1e25834d0, type: 3}
+--- !u!114 &-2953419930935634890
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4938251828876247570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bb66936af6dec2e4bbd60c468b57a316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  flipInterval: 0.2

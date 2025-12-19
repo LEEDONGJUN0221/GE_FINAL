@@ -216,7 +216,8 @@ public class PrincessControllerStage2 : MonoBehaviour
         isMoving = true;
 
         if (moveSound != null)
-            audioSource.PlayOneShot(moveSound);
+            audioSource.PlayOneShot(moveSound, moveVolume);
+
 
 
         Vector3 startPos = transform.position;
