@@ -41,6 +41,10 @@
         private AudioSource audioSource;
 
 
+        [Header("Score UI")]
+        public Stage2ScoreUI scoreUI;
+
+
         private WarningManagerStage2 warningManager;
 
         // =====================
@@ -139,7 +143,10 @@
         public void AddChocolate(int amount)
         {
             chocolateCount = Mathf.Min(chocolateGoal, chocolateCount + amount);
-            UpdateChocolateUI();
+
+            // 🔔 UI 업데이트 + 들썩임
+            if (scoreUI != null)
+                scoreUI.UpdateScore(chocolateCount, chocolateGoal);
 
             if (chocolateCount >= chocolateGoal)
                 OnStageClear();
