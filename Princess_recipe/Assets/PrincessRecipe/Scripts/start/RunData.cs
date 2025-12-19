@@ -29,4 +29,12 @@ public class RunData : MonoBehaviour
         int c2 = Mathf.Max(0, choice2);
         return c0 + c1 * 2 + c2 * 4; // 0~7
     }
+
+    // ★ 추가: 새 게임용 초기화
+    public void ResetForNewRun()
+    {
+        choice0 = -1;
+        choice1 = -1;
+        choice2 = -1;
+    }
 }
